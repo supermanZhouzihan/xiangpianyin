@@ -304,7 +304,7 @@ export default {
         this.form.openId = localOpendId;
         this.getRecord();
       } else {
-        this.login();
+        // this.login();
       }
     },
     //hash模式下的 判断公众号截取code
