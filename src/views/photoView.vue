@@ -30,7 +30,7 @@
                 </div>
             </div>
         </div>
-        <img v-show="isShow" :src="htmlUrl" style="width:100%" alt="" />
+        <img v-show="isShow" :src="htmlUrl" style="width:400px" alt="" />
 
         <van-uploader :after-read="afterRead" :before-read="beforeRead">
             <van-button icon="plus" type="primary">上传文件</van-button>

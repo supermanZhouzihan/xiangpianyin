@@ -47,7 +47,9 @@ module.exports = {
         // target:'http://192.168.1.139:8080',
 
         // target: 'http://192.168.1.198:8082', //测试环境
-        target:'http://47.108.149.12:8082',
+        // target:'http://47.108.149.12:8082',
+
+        target:'http://47.109.184.216:1234',
         // target:'https://pro.scm.tysp.com/_javaMain',//生产环境
         changeOrigin: true,
         pathRewrite: {
