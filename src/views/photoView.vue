@@ -50,7 +50,7 @@
          <div>我在测试</div> 
         <img v-show="isShow" :src="htmlUrl" alt="" />
         <!-- <img :src="canvasImgUrl" alt=""> -->
-        <!-- <canvas ref="canvas" width="500" height="500"></canvas> -->
+        <canvas ref="canvas" width="500" height="500"></canvas>
 
         <van-uploader :after-read="afterRead" :before-read="beforeRead">
             <van-button icon="plus" type="primary">上传文件</van-button>
@@ -132,11 +132,11 @@ export default {
                 width: this.currentImgInfo.PixelXDimension,
                 height: this.currentImgInfo.PixelYDimension+this.$refs.imginfo.offsetHeight,
                 // height: this.currentImgInfo.PixelYDimension,
-                scale: 1
+                scale: 1,
+                allowTaint:true
             }).then((canvas) => {
-                alert (JSON.stringify(canvas) )
                 console.log(canvas)
-                let url = canvas.toDataURL("image/jpeg",0.02);
+                let url = canvas.toDataURL("image/jpeg",0.01);
                 let url1=url.slice(0,59)
                 alert (url1)
                 this.htmlUrl = url;
