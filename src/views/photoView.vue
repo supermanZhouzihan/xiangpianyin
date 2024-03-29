@@ -29,7 +29,7 @@
             </div>
         </div> -->
         <div ref="imageTofile" class="imgContainer">
-            <img :src="currentImgUrl" alt="" />
+            <img :src="currentImgUrl" alt="" :style="{ width:renderOldImgXSize+'px',height:renderOldImgYSize+'px'}" />
             <div class="imginfo" ref="imginfo" id="imginfo" :style="{ width: currentImgInfo.PixelXDimension + 'px' }">
                 <div>
                     <div>{{ currentImgInfo.Model }}</div>
@@ -47,7 +47,7 @@
             </div>
         </div>
 
-         <div>我在测试</div> 
+        <div>我在测试</div>
         <img v-show="isShow" :src="htmlUrl" alt="" />
         <!-- <img :src="canvasImgUrl" alt=""> -->
         <canvas ref="canvas" width="500" height="500"></canvas>
@@ -73,7 +73,9 @@ export default {
             currentImgInfo: {},
             isShow: false,
             htmlUrl: "",
-            canvasImgUrl: ""
+            canvasImgUrl: "",
+            renderOldImgXSize:"",
+            renderOldImgYSize:""
         };
     },
     // created() {
@@ -101,6 +103,25 @@ export default {
                 let currentImgInfo = EXIF.getAllTags(this);
                 console.log("currentImgInfo", currentImgInfo);
                 that.currentImgInfo = currentImgInfo;
+
+                let maxSize = Math.max(that.currentImgInfo.PixelXDimension, that.currentImgInfo.PixelYDimension);
+                // let renderOldImgXSize;
+                // let renderOldImgYSize;
+                if (maxSize == that.currentImgInfo.PixelXDimension) {
+                    if (maxSize > 4000) {
+                        that.renderOldImgXSize = 4000;
+                        // that.currentImgInfo.PixelXDimension/that.currentImgInfo.PixelYDimension==4000/X
+                        that.renderOldImgYSize = 4000 / (that.currentImgInfo.PixelXDimension / that.currentImgInfo.PixelYDimension);
+                    }
+                }
+                else{
+                    if(maxSize>4000){
+                        that.renderOldImgYSize = 4000;
+                        that.renderOldImgXSize=4000 / (that.currentImgInfo.PixelYDimension / that.currentImgInfo.PixelXDimension);
+                    }
+                }
+
+
                 // that.drawImage(file.content);
             });
         },
@@ -112,41 +133,65 @@ export default {
             var element = document.getElementById('imginfo');
 
             // 获取生成图片的尺寸
-            var width = this.currentImgInfo.PixelXDimension;
-            var height = this.currentImgInfo.PixelYDimension;
+            // var width = this.currentImgInfo.PixelXDimension;
+            // var height = this.currentImgInfo.PixelYDimension;
+            var width=this.renderOldImgXSize;
+            var height=this.renderOldImgYSize;
 
             // 计算动态字体大小
             var fontSize = Math.min(width, height) * 0.1; // 例如，根据尺寸比例设置字体大小
-            console.log('font-size',fontSize)
+            console.log('font-size', fontSize)
             // 设置动态字体大小
             element.style.fontSize = fontSize + 'px';
             console.log(this.$refs.imginfo.offsetHeight);
-            this.$refs.makeLogo.style.width=fontSize + 'px'
+            this.$refs.makeLogo.style.width = fontSize + 'px'
 
-            
+            // let maxSize = Math.max(this.currentImgInfo.PixelXDimension, this.currentImgInfo.PixelYDimension);
+            // let renderXSize;
+            // let renderYSize;
+            // if (maxSize == this.currentImgInfo.PixelXDimension) {
+            //     if (maxSize > 4000) {
+            //         renderXSize = 4000;
+            //         // this.currentImgInfo.PixelXDimension/this.currentImgInfo.PixelYDimension==4000/X
+            //         renderYSize = 4000 / (this.currentImgInfo.PixelXDimension / this.currentImgInfo.PixelYDimension);
+            //         console.log("进来了", renderYSize)
+            //     }
+
+            // }
+            // else {
+            //     renderXSize = this.currentImgInfo.PixelXDimension;
+            //     renderYSize = this.currentImgInfo.PixelYDimension;
+
+            // }
 
 
-            console.log(this.currentImgInfo.PixelXDimension, this.currentImgInfo.PixelYDimension)
-           new html2canvas(this.$refs.imageTofile, {
+
+            // console.log(this.currentImgInfo.PixelXDimension, this.currentImgInfo.PixelYDimension)
+            // console.log(renderXSize, renderYSize)
+            html2canvas(this.$refs.imageTofile, {
                 // backgroundColor: "red",
-                width: this.currentImgInfo.PixelXDimension,
-                height: this.currentImgInfo.PixelYDimension+this.$refs.imginfo.offsetHeight,
-                // height: this.currentImgInfo.PixelYDimension,
+                // width: renderXSize,
+                width:this.renderOldImgXSize,
+                // height: this.currentImgInfo.PixelYDimension + this.$refs.imginfo.offsetHeight,
+                height: this.renderOldImgYSize,
+                // height: renderYSize,
                 scale: 1,
-                allowTaint:true
             }).then((canvas) => {
                 console.log(canvas)
-                let url = canvas.toDataURL("image/jpeg",0.01);
-                let url1=url.slice(0,59)
-                alert (url1)
+                let url = canvas.toDataURL("image/png");
                 this.htmlUrl = url;
-                this.isShow = true;
-
-
+                this.$nextTick(() => {
+                    this.isShow = true;
+                })
                 // const link = document.createElement("a");
                 // link.href = url;
                 // link.download = "my-image.jpeg";
                 // link.click();
+                
+
+            }).catch((err) => {
+                console.log(err);
+                alert(err)
             });
         },
         base64ToFile: function (urlData, fileName) {
