@@ -30,7 +30,7 @@
         </div> -->
         <div ref="imageTofile" class="imgContainer">
             <img :src="currentImgUrl" alt="" :style="{ width:renderOldImgXSize+'px',height:renderOldImgYSize+'px'}" />
-            <div class="imginfo" ref="imginfo" id="imginfo" :style="{ width: currentImgInfo.PixelXDimension + 'px' }">
+            <div class="imginfo" ref="imginfo" id="imginfo" :style="{ width: renderOldImgXSize + 'px' }">
                 <div>
                     <div>{{ currentImgInfo.Model }}</div>
                     <div>{{ currentImgInfo.DateTime }}</div>
@@ -50,7 +50,7 @@
         <div>我在测试</div>
         <img v-show="isShow" :src="htmlUrl" alt="" />
         <!-- <img :src="canvasImgUrl" alt=""> -->
-        <canvas ref="canvas" width="500" height="500"></canvas>
+        <!-- <canvas ref="canvas" width="500" height="500"></canvas> -->
 
         <van-uploader :after-read="afterRead" :before-read="beforeRead">
             <van-button icon="plus" type="primary">上传文件</van-button>
@@ -139,7 +139,7 @@ export default {
             var height=this.renderOldImgYSize;
 
             // 计算动态字体大小
-            var fontSize = Math.min(width, height) * 0.1; // 例如，根据尺寸比例设置字体大小
+            var fontSize = Math.min(width, height) * 0.05; // 例如，根据尺寸比例设置字体大小
             console.log('font-size', fontSize)
             // 设置动态字体大小
             element.style.fontSize = fontSize + 'px';
@@ -173,7 +173,7 @@ export default {
                 // width: renderXSize,
                 width:this.renderOldImgXSize,
                 // height: this.currentImgInfo.PixelYDimension + this.$refs.imginfo.offsetHeight,
-                height: this.renderOldImgYSize,
+                height: this.renderOldImgYSize+this.$refs.imginfo.offsetHeight,
                 // height: renderYSize,
                 scale: 1,
             }).then((canvas) => {
