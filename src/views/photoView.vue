@@ -107,6 +107,26 @@ export default {
                 let maxSize = Math.max(that.currentImgInfo.PixelXDimension, that.currentImgInfo.PixelYDimension);
                 // let renderOldImgXSize;
                 // let renderOldImgYSize;
+
+                // 获取目标DOM元素
+                var element = document.getElementById('imginfo');
+
+                // 获取生成图片的尺寸
+                // var width = this.currentImgInfo.PixelXDimension;
+                // var height = this.currentImgInfo.PixelYDimension;
+                var width=this.renderOldImgXSize;
+                var height=this.renderOldImgYSize;
+
+                // 计算动态字体大小
+                var fontSize = Math.min(width, height) * 0.05; // 例如，根据尺寸比例设置字体大小
+                console.log('font-size', fontSize)
+                // 设置动态字体大小
+                element.style.fontSize = fontSize + 'px';
+                console.log(that.$refs.imginfo.offsetHeight);
+                that.$refs.makeLogo.style.width = fontSize + 'px'
+
+
+
                 if (maxSize == that.currentImgInfo.PixelXDimension) {
                     if (maxSize > 4000) {
                         that.renderOldImgXSize = 4000;
@@ -129,22 +149,7 @@ export default {
             // let width = "";
             // let height = "";
 
-            // 获取目标DOM元素
-            var element = document.getElementById('imginfo');
-
-            // 获取生成图片的尺寸
-            // var width = this.currentImgInfo.PixelXDimension;
-            // var height = this.currentImgInfo.PixelYDimension;
-            var width=this.renderOldImgXSize;
-            var height=this.renderOldImgYSize;
-
-            // 计算动态字体大小
-            var fontSize = Math.min(width, height) * 0.05; // 例如，根据尺寸比例设置字体大小
-            console.log('font-size', fontSize)
-            // 设置动态字体大小
-            element.style.fontSize = fontSize + 'px';
-            console.log(this.$refs.imginfo.offsetHeight);
-            this.$refs.makeLogo.style.width = fontSize + 'px'
+            
 
             // let maxSize = Math.max(this.currentImgInfo.PixelXDimension, this.currentImgInfo.PixelYDimension);
             // let renderXSize;
