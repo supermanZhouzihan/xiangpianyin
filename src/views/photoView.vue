@@ -10,44 +10,101 @@
 
 <template>
   <div class="container">
-    <div ref="imageTofile" class="imgContainer">
+    <div ref="imageTofile" class="virtualImgContainer">
       <img :src="currentImgUrl" alt="" class="cusimg" />
       <div class="imginfo" v-if="currentImgInfo">
         <div class="text-left">
           <div>{{ currentImgInfo.Model }}</div>
-          <div>{{ currentImgInfo.DateTime }}</div>
+          <div class="textBottom">{{ currentImgInfo.DateTime }}</div>
         </div>
-        <div class="makeLogo">
-          <img src="../assets/logo.png" alt="" style="width: 0.5rem" />
-        </div>
-        <div class="text-left">
-          <div>
-            <span v-if="currentImgInfo.ExposureTime"
-              >{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
-                currentImgInfo.FNumber
-              }}
-              {{ reduceFraction(currentImgInfo.ExposureTime.numerator,currentImgInfo.ExposureTime.denominator) }} ISO{{
-                currentImgInfo.ISOSpeedRatings
-              }}</span
-            >
+
+        <div class="text-left flexBetween" style="align-items: center">
+          <div class="makeLogo">
+            <img src="../assets/logo.png" alt="" style="width: 0.5rem" />
           </div>
-          <div v-if="currentImgInfo.GPSLongitude">
-            {{
-              currentImgInfo.GPSLatitude[0] +
-              "°" +
-              currentImgInfo.GPSLatitude[1] +
-              "′" +
-              currentImgInfo.GPSLatitude[2] +
-              "″N"
-            }}
-            {{
-              currentImgInfo.GPSLongitude[0] +
-              "°" +
-              currentImgInfo.GPSLongitude[1] +
-              "′" +
-              currentImgInfo.GPSLongitude[2] +
-              "″E"
-            }}
+          <div>
+            <div>
+              <span v-if="currentImgInfo.ExposureTime"
+                >{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
+                  currentImgInfo.FNumber
+                }}
+                {{
+                  reduceFraction(
+                    currentImgInfo.ExposureTime.numerator,
+                    currentImgInfo.ExposureTime.denominator
+                  )
+                }}
+                ISO{{ currentImgInfo.ISOSpeedRatings }}</span
+              >
+            </div>
+            <div v-if="currentImgInfo.GPSLongitude" class="textBottom">
+              {{
+                currentImgInfo.GPSLatitude[0] +
+                "°" +
+                currentImgInfo.GPSLatitude[1] +
+                "′" +
+                currentImgInfo.GPSLatitude[2] +
+                "″N"
+              }}
+              {{
+                currentImgInfo.GPSLongitude[0] +
+                "°" +
+                currentImgInfo.GPSLongitude[1] +
+                "′" +
+                currentImgInfo.GPSLongitude[2] +
+                "″E"
+              }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="imgContainer">
+      <img :src="currentImgUrl" alt="" class="cusimg" />
+      <div class="imginfo" v-if="currentImgInfo">
+        <div class="text-left">
+          <div>{{ currentImgInfo.Model }}</div>
+          <div class="textBottom">{{ currentImgInfo.DateTime }}</div>
+        </div>
+
+        <div class="text-left flexBetween" style="align-items: center">
+          <div class="makeLogo">
+            <img src="../assets/logo.png" alt="" style="width: 0.5rem" />
+          </div>
+          <div>
+            <div>
+              <span v-if="currentImgInfo.ExposureTime"
+                >{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
+                  currentImgInfo.FNumber
+                }}
+                {{
+                  reduceFraction(
+                    currentImgInfo.ExposureTime.numerator,
+                    currentImgInfo.ExposureTime.denominator
+                  )
+                }}
+                ISO{{ currentImgInfo.ISOSpeedRatings }}</span
+              >
+            </div>
+            <div v-if="currentImgInfo.GPSLongitude" class="textBottom">
+              {{
+                currentImgInfo.GPSLatitude[0] +
+                "°" +
+                currentImgInfo.GPSLatitude[1] +
+                "′" +
+                currentImgInfo.GPSLatitude[2] +
+                "″N"
+              }}
+              {{
+                currentImgInfo.GPSLongitude[0] +
+                "°" +
+                currentImgInfo.GPSLongitude[1] +
+                "′" +
+                currentImgInfo.GPSLongitude[2] +
+                "″E"
+              }}
+            </div>
           </div>
         </div>
       </div>
@@ -115,8 +172,9 @@ export default {
 
       let max = Math.max(width, height);
       let scale = parseInt(4000 / max);
+      console.log("width", width, height);
 
-      console.log('scale',scale)
+      console.log("scale", scale);
 
       html2canvas(this.$refs.imageTofile, {
         backgroundColor: "#fff",
@@ -193,8 +251,12 @@ export default {
 
 <style lang="scss" scoped>
 .container {
+  > div.virtualImgContainer {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    width: 100%;
 
-  > div.imgContainer {
     .cusimg {
       width: 100%;
     }
@@ -205,8 +267,51 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.26rem;
+      font-size: 0.3rem;
       box-sizing: border-box;
+      font-weight: 700;
+      .makeLogo {
+        padding: 10px;
+        img {
+          border-right: 1px solid #ccc;
+          padding-right: 10px;
+        }
+      }
+      .textBottom {
+        font-size: 0.26rem;
+        color: #ccc;
+        font-weight: 500;
+      }
+    }
+  }
+  > div.imgContainer {
+    width: 80%;
+    margin: 0 auto;
+    .cusimg {
+      width: 100%;
+    }
+
+    .imginfo {
+      width: 100%;
+      padding: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.3rem;
+      box-sizing: border-box;
+      font-weight: 700;
+      .makeLogo {
+        padding: 10px;
+        img {
+          border-right: 1px solid #ccc;
+          padding-right: 10px;
+        }
+      }
+      .textBottom {
+        font-size: 0.26rem;
+        color: #ccc;
+        font-weight: 500;
+      }
     }
   }
 }
