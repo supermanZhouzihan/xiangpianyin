@@ -9,7 +9,25 @@
 !-->
 
 <template>
-  <div class="container">
+  <div class="photoViewContainer">
+    <div class="title">
+      你好，摄影师！
+    </div>
+    <div
+      style="width: 94%;background-color: rgb(33,33,33);margin: 0 auto;padding: .5rem;box-sizing: border-box;margin-bottom: 10px;">
+      <van-uploader :after-read="afterRead" :before-read="beforeRead" multiple :max-size="20 * 1024 * 1024"
+        @oversize="onOversize" :max-count="2">
+        <van-button round color="rgb(241,241,241)" class="uploadBtn">
+          上传照片
+        </van-button>
+      </van-uploader>
+
+    </div>
+    <div class="exampleList">
+      <img src="../assets/example.jpg" style="width: 100%;margin-bottom: 10px;" alt="">
+      <img src="../assets/example.jpg" style="width: 100%;margin-bottom: 10px;" alt="">
+      <img src="../assets/example.jpg" style="width: 100%;margin-bottom: 10px;" alt="">
+    </div>
     <div ref="imageTofile" class="virtualImgContainer">
       <img :src="currentImgUrl" alt="" class="cusimg" />
       <div class="imginfo" v-if="currentImgInfo">
@@ -24,36 +42,34 @@
           </div>
           <div>
             <div>
-              <span v-if="currentImgInfo.ExposureTime"
-                >{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
-                  currentImgInfo.FNumber
-                }}
+              <span v-if="currentImgInfo.ExposureTime">{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
+        currentImgInfo.FNumber
+      }}
                 {{
-                  reduceFraction(
-                    currentImgInfo.ExposureTime.numerator,
-                    currentImgInfo.ExposureTime.denominator
-                  )
-                }}
-                ISO{{ currentImgInfo.ISOSpeedRatings }}</span
-              >
+          reduceFraction(
+            currentImgInfo.ExposureTime.numerator,
+            currentImgInfo.ExposureTime.denominator
+          )
+        }}
+                ISO{{ currentImgInfo.ISOSpeedRatings }}</span>
             </div>
             <div v-if="currentImgInfo.GPSLongitude" class="textBottom">
               {{
-                currentImgInfo.GPSLatitude[0] +
-                "°" +
-                currentImgInfo.GPSLatitude[1] +
-                "′" +
-                currentImgInfo.GPSLatitude[2] +
-                "″N"
-              }}
+        currentImgInfo.GPSLatitude[0] +
+        "°" +
+        currentImgInfo.GPSLatitude[1] +
+        "′" +
+        currentImgInfo.GPSLatitude[2] +
+        "″N"
+      }}
               {{
-                currentImgInfo.GPSLongitude[0] +
-                "°" +
-                currentImgInfo.GPSLongitude[1] +
-                "′" +
-                currentImgInfo.GPSLongitude[2] +
-                "″E"
-              }}
+          currentImgInfo.GPSLongitude[0] +
+          "°" +
+          currentImgInfo.GPSLongitude[1] +
+          "′" +
+          currentImgInfo.GPSLongitude[2] +
+          "″E"
+        }}
             </div>
           </div>
         </div>
@@ -74,35 +90,33 @@
           </div>
           <div>
             <div>
-              <span v-if="currentImgInfo.ExposureTime"
-                >{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
-                  currentImgInfo.FNumber
-                }}
+              <span v-if="currentImgInfo.ExposureTime">{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
+        currentImgInfo.FNumber
+      }}
                 {{
-                  reduceFraction(
-                    currentImgInfo.ExposureTime.numerator,
-                    currentImgInfo.ExposureTime.denominator
-                  )
-                }}
-                ISO{{ currentImgInfo.ISOSpeedRatings }}</span
-              >
+          reduceFraction(
+            currentImgInfo.ExposureTime.numerator,
+            currentImgInfo.ExposureTime.denominator
+          )
+        }}
+                ISO{{ currentImgInfo.ISOSpeedRatings }}</span>
             </div>
             <div v-if="currentImgInfo.GPSLongitude" class="textBottom">
               {{
-                currentImgInfo.GPSLatitude[0] +
-                "°" +
-                currentImgInfo.GPSLatitude[1] +
-                "′" +
-                currentImgInfo.GPSLatitude[2] +
-                "″N"
-              }}
+        currentImgInfo.GPSLatitude[0] +
+        "°" +
+        currentImgInfo.GPSLatitude[1] +
+        "′" +
+        currentImgInfo.GPSLatitude[2] +
+        "″N"
+      }}
               {{
-                currentImgInfo.GPSLongitude[0] +
-                "°" +
-                currentImgInfo.GPSLongitude[1] +
-                "′" +
-                currentImgInfo.GPSLongitude[2] +
-                "″E"
+          currentImgInfo.GPSLongitude[0] +
+          "°" +
+          currentImgInfo.GPSLongitude[1] +
+          "′" +
+              currentImgInfo.GPSLongitude[2] +
+              "″E"
               }}
             </div>
           </div>
@@ -112,7 +126,8 @@
 
     <img v-show="isShow" :src="htmlUrl" alt="" />
 
-    <van-uploader :after-read="afterRead" :before-read="beforeRead">
+    <van-uploader :after-read="afterRead" :before-read="beforeRead" multiple :max-size="20* 1024 * 1024"
+      @oversize="onOversize" :max-count="2">
       <van-button icon="plus" type="primary">上传文件</van-button>
     </van-uploader>
     <van-button @click="imgTofile">生成图片</van-button>
@@ -141,19 +156,33 @@ export default {
   // created() {
 
   // },
-  mounted() {},
+  mounted() { },
   methods: {
     //上传前
     beforeRead(file) {
-      alert(file.type);
-      if (file.type !== "image/jpeg") {
-        Toast("请上传 jpg 格式图片");
-        return false;
+      // alert(file.type);
+      console.log('file', file)
+      if (Array.isArray(file)) {
+        let fileList = file;
+        let findNoJpgPng = fileList.find(item => item.type !== "image/jpeg" && item.type !== "image/png")
+        if (findNoJpgPng) {
+          alert("请上传 jpg / png格式图片");
+          return false
+        }
       }
+      else {
+        if (file.type !== "image/jpeg" && file.type !== "image/png") {
+          console.log(file.type, "image/png")
+          alert("请上传 jpg / png格式图片");
+          return false;
+        }
+      }
+
       return true;
     },
     //上传后
     afterRead(file) {
+      
       console.log("file", file);
       this.currentImgUrl = file.content;
       let that = this;
@@ -192,6 +221,10 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+    onOversize(file) {
+      console.log(file);
+      Toast('文件大小不能超过 20mb');
     },
     base64ToFile: function (urlData, fileName) {
       let arr = urlData.split(",");
@@ -250,8 +283,41 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.container {
-  > div.virtualImgContainer {
+.photoViewContainer {
+  font-size: 0.42rem;
+  background-color: black;
+
+  .title {
+    text-align: left;
+    padding: .42rem 1rem;
+    color: #fff;
+  }
+
+  .cusUpload.van-uploader ::v-deep {
+    width: 100%;
+
+    .van-uploader__wrapper {
+      width: 100%;
+
+      .van-uploader__input-wrapper {
+        width: 100%;
+      }
+    }
+  }
+
+  .uploadBtn {
+    width: 100%;
+    color: rgb(0, 0, 0) !important;
+    font-size: .6rem;
+    padding: .6rem;
+  }
+
+  .exampleList {
+    width: 92%;
+    margin: 0 auto;
+  }
+
+  >div.virtualImgContainer {
     position: absolute;
     top: -9999px;
     left: -9999px;
@@ -270,13 +336,16 @@ export default {
       font-size: 0.3rem;
       box-sizing: border-box;
       font-weight: 700;
+
       .makeLogo {
         padding: 10px;
+
         img {
           border-right: 1px solid #ccc;
           padding-right: 10px;
         }
       }
+
       .textBottom {
         font-size: 0.26rem;
         color: #ccc;
@@ -284,9 +353,11 @@ export default {
       }
     }
   }
-  > div.imgContainer {
+
+  >div.imgContainer {
     width: 80%;
     margin: 0 auto;
+
     .cusimg {
       width: 100%;
     }
@@ -300,13 +371,16 @@ export default {
       font-size: 0.3rem;
       box-sizing: border-box;
       font-weight: 700;
+
       .makeLogo {
         padding: 10px;
+
         img {
           border-right: 1px solid #ccc;
           padding-right: 10px;
         }
       }
+
       .textBottom {
         font-size: 0.26rem;
         color: #ccc;
