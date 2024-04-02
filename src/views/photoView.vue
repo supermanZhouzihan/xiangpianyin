@@ -10,73 +10,101 @@
 
 <template>
   <div class="photoViewContainer">
-    <div class="title">
-      你好，摄影师！
-    </div>
+    <div class="title">你好，摄影师！</div>
     <div
-      style="width: 94%;background-color: rgb(33,33,33);margin: 0 auto;padding: .5rem;box-sizing: border-box;margin-bottom: 10px;">
-      <van-uploader :after-read="afterRead" :before-read="beforeRead" multiple :max-size="20 * 1024 * 1024"
-        @oversize="onOversize" :max-count="2">
+      style="
+        width: 94%;
+        background-color: rgb(33, 33, 33);
+        margin: 0 auto;
+        padding: 0.5rem;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+      "
+    >
+      <van-uploader
+        :after-read="afterRead"
+        :before-read="beforeRead"
+        multiple
+        :max-size="40 * 1024 * 1024"
+        @oversize="onOversize"
+        :max-count="2"
+      >
         <van-button round color="rgb(241,241,241)" class="uploadBtn">
           上传照片
         </van-button>
       </van-uploader>
-
     </div>
     <div class="exampleList">
-      <img src="../assets/example.jpg" style="width: 100%;margin-bottom: 10px;" alt="">
-      <img src="../assets/example.jpg" style="width: 100%;margin-bottom: 10px;" alt="">
-      <img src="../assets/example.jpg" style="width: 100%;margin-bottom: 10px;" alt="">
+      <img
+        src="../assets/example.jpg"
+        style="width: 100%; margin-bottom: 10px"
+        alt=""
+      />
+      <img
+        src="../assets/example.jpg"
+        style="width: 100%; margin-bottom: 10px"
+        alt=""
+      />
+      <img
+        src="../assets/example.jpg"
+        style="width: 100%; margin-bottom: 10px"
+        alt=""
+      />
     </div>
-    <div ref="imageTofile" class="virtualImgContainer">
-      <img :src="currentImgUrl" alt="" class="cusimg" />
-      <div class="imginfo" v-if="currentImgInfo">
-        <div class="text-left">
-          <div>{{ currentImgInfo.Model }}</div>
-          <div class="textBottom">{{ currentImgInfo.DateTime }}</div>
-        </div>
-
-        <div class="text-left flexBetween" style="align-items: center">
-          <div class="makeLogo">
-            <img src="../assets/logo.png" alt="" style="width: 0.5rem" />
-          </div>
-          <div>
-            <div>
-              <span v-if="currentImgInfo.ExposureTime">{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
-        currentImgInfo.FNumber
-      }}
-                {{
-          reduceFraction(
-            currentImgInfo.ExposureTime.numerator,
-            currentImgInfo.ExposureTime.denominator
-          )
-        }}
-                ISO{{ currentImgInfo.ISOSpeedRatings }}</span>
+    <div v-if="currentImgInfo && currentImgInfo.length > 0" style="width:100%">
+      <div v-for="item in currentImgInfo" :key="item.index" style="width:100%">
+        <div :ref="'imageTofile' + item.index" class="virtualImgContainer">
+          <img :src="item.imgUrl" alt="" class="cusimg" />
+          <div>{{ item.index }}</div>
+          <div class="imginfo" v-if="item">
+            <div class="text-left">
+              <div>{{ item.Model }}</div>
+              <div class="textBottom">{{ item.DateTime }}</div>
             </div>
-            <div v-if="currentImgInfo.GPSLongitude" class="textBottom">
-              {{
-        currentImgInfo.GPSLatitude[0] +
-        "°" +
-        currentImgInfo.GPSLatitude[1] +
-        "′" +
-        currentImgInfo.GPSLatitude[2] +
-        "″N"
-      }}
-              {{
-          currentImgInfo.GPSLongitude[0] +
-          "°" +
-          currentImgInfo.GPSLongitude[1] +
-          "′" +
-          currentImgInfo.GPSLongitude[2] +
-          "″E"
-        }}
+
+            <div class="text-left flexBetween" style="align-items: center">
+              <div class="makeLogo">
+                <img src="../assets/logo.png" alt="" style="width: 0.5rem" />
+              </div>
+              <div>
+                <div>
+                  <span v-if="item.ExposureTime"
+                    >{{ item.FocalLengthIn35mmFilm }}mm f/{{ item.FNumber }}
+                    {{
+                      reduceFraction(
+                        item.ExposureTime.numerator,
+                        item.ExposureTime.denominator
+                      )
+                    }}
+                    ISO{{ item.ISOSpeedRatings }}</span
+                  >
+                </div>
+                <div v-if="item.GPSLongitude" class="textBottom">
+                  {{
+                    item.GPSLatitude[0] +
+                    "°" +
+                    item.GPSLatitude[1] +
+                    "′" +
+                    item.GPSLatitude[2] +
+                    "″N"
+                  }}
+                  {{
+                    item.GPSLongitude[0] +
+                    "°" +
+                    item.GPSLongitude[1] +
+                    "′" +
+                    item.GPSLongitude[2] +
+                    "″E"
+                  }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="imgContainer">
+    <!-- <div class="imgContainer">
       <img :src="currentImgUrl" alt="" class="cusimg" />
       <div class="imginfo" v-if="currentImgInfo">
         <div class="text-left">
@@ -90,47 +118,55 @@
           </div>
           <div>
             <div>
-              <span v-if="currentImgInfo.ExposureTime">{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
-        currentImgInfo.FNumber
-      }}
+              <span v-if="currentImgInfo.ExposureTime"
+                >{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
+                  currentImgInfo.FNumber
+                }}
                 {{
-          reduceFraction(
-            currentImgInfo.ExposureTime.numerator,
-            currentImgInfo.ExposureTime.denominator
-          )
-        }}
-                ISO{{ currentImgInfo.ISOSpeedRatings }}</span>
+                  reduceFraction(
+                    currentImgInfo.ExposureTime.numerator,
+                    currentImgInfo.ExposureTime.denominator
+                  )
+                }}
+                ISO{{ currentImgInfo.ISOSpeedRatings }}</span
+              >
             </div>
             <div v-if="currentImgInfo.GPSLongitude" class="textBottom">
               {{
-        currentImgInfo.GPSLatitude[0] +
-        "°" +
-        currentImgInfo.GPSLatitude[1] +
-        "′" +
-        currentImgInfo.GPSLatitude[2] +
-        "″N"
-      }}
+                currentImgInfo.GPSLatitude[0] +
+                "°" +
+                currentImgInfo.GPSLatitude[1] +
+                "′" +
+                currentImgInfo.GPSLatitude[2] +
+                "″N"
+              }}
               {{
-          currentImgInfo.GPSLongitude[0] +
-          "°" +
-          currentImgInfo.GPSLongitude[1] +
-          "′" +
-              currentImgInfo.GPSLongitude[2] +
-              "″E"
+                currentImgInfo.GPSLongitude[0] +
+                "°" +
+                currentImgInfo.GPSLongitude[1] +
+                "′" +
+                currentImgInfo.GPSLongitude[2] +
+                "″E"
               }}
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <img v-show="isShow" :src="htmlUrl" alt="" />
 
-    <van-uploader :after-read="afterRead" :before-read="beforeRead" multiple :max-size="20* 1024 * 1024"
-      @oversize="onOversize" :max-count="2">
+    <van-uploader
+      :after-read="afterRead"
+      :before-read="beforeRead"
+      multiple
+      :max-size="40 * 1024 * 1024"
+      @oversize="onOversize"
+      :max-count="2"
+    >
       <van-button icon="plus" type="primary">上传文件</van-button>
     </van-uploader>
-    <van-button @click="imgTofile">生成图片</van-button>
+    <van-button @click="batchTofile">生成图片</van-button>
     <!-- <van-button @click="downloadImage">生成图片</van-button> -->
   </div>
 </template>
@@ -144,8 +180,8 @@ export default {
   data() {
     return {
       baseUrl: process.env.VUE_APP_BASE_API_PURCHASE,
-      currentImgUrl: "",
-      currentImgInfo: null,
+      // currentImgUrlList: [],
+      currentImgInfo: [],
       isShow: false,
       htmlUrl: "",
       canvasImgUrl: "",
@@ -156,23 +192,24 @@ export default {
   // created() {
 
   // },
-  mounted() { },
+  mounted() {},
   methods: {
     //上传前
     beforeRead(file) {
       // alert(file.type);
-      console.log('file', file)
+      console.log("file", file);
       if (Array.isArray(file)) {
         let fileList = file;
-        let findNoJpgPng = fileList.find(item => item.type !== "image/jpeg" && item.type !== "image/png")
+        let findNoJpgPng = fileList.find(
+          (item) => item.type !== "image/jpeg" && item.type !== "image/png"
+        );
         if (findNoJpgPng) {
           alert("请上传 jpg / png格式图片");
-          return false
+          return false;
         }
-      }
-      else {
+      } else {
         if (file.type !== "image/jpeg" && file.type !== "image/png") {
-          console.log(file.type, "image/png")
+          console.log(file.type, "image/png");
           alert("请上传 jpg / png格式图片");
           return false;
         }
@@ -182,20 +219,45 @@ export default {
     },
     //上传后
     afterRead(file) {
-      
       console.log("file", file);
-      this.currentImgUrl = file.content;
+      this.currentImgInfo = [];
+      //多个文件
+      if (Array.isArray(file)) {
+        file.forEach((item, index) => {
+          console.log("item", item);
+          this.getExifData(item, index);
+          // this.currentImgUrl = file.content;
+          // this.currentImgUrlList.push(item.content);
+        });
+      } else {
+        this.getExifData(file, 0);
+        // this.currentImgUrlList.push(file.content);
+      }
+      // console.log("list", this.currentImgUrlList);
+    },
+    getExifData(file, index) {
+      //单个文件
       let that = this;
       EXIF.getData(file.file, function () {
         console.log("getData", this);
         // 这里面可以看到值，想要什么直接获取即可。
         let currentImgInfo = EXIF.getAllTags(this);
         console.log("currentImgInfo", currentImgInfo);
-        that.currentImgInfo = currentImgInfo;
+        currentImgInfo.imgUrl = file.content;
+        currentImgInfo.index = index;
+        that.currentImgInfo.push(currentImgInfo);
+        console.log("currentInfo", that.currentImgInfo);
       });
     },
-    imgTofile() {
-      let renderDom = this.$refs.imageTofile;
+    batchTofile(){
+      this.currentImgInfo.map((item)=>{
+        let ref='imageTofile'+[item.index];
+        this.imgTofile(ref);
+      })
+    },
+    imgTofile(ref) {
+      console.log('ref',ref)
+      let renderDom =this.$refs[ref];
       let width = renderDom.offsetWidth;
       let height = renderDom.offsetHeight;
 
@@ -224,7 +286,7 @@ export default {
     },
     onOversize(file) {
       console.log(file);
-      Toast('文件大小不能超过 20mb');
+      alert("文件大小不能超过 40mb");
     },
     base64ToFile: function (urlData, fileName) {
       let arr = urlData.split(",");
@@ -289,7 +351,7 @@ export default {
 
   .title {
     text-align: left;
-    padding: .42rem 1rem;
+    padding: 0.42rem 1rem;
     color: #fff;
   }
 
@@ -308,8 +370,8 @@ export default {
   .uploadBtn {
     width: 100%;
     color: rgb(0, 0, 0) !important;
-    font-size: .6rem;
-    padding: .6rem;
+    font-size: 0.6rem;
+    padding: 0.6rem;
   }
 
   .exampleList {
@@ -317,7 +379,7 @@ export default {
     margin: 0 auto;
   }
 
-  >div.virtualImgContainer {
+  div.virtualImgContainer {
     position: absolute;
     top: -9999px;
     left: -9999px;
@@ -354,7 +416,7 @@ export default {
     }
   }
 
-  >div.imgContainer {
+  > div.imgContainer {
     width: 80%;
     margin: 0 auto;
 
