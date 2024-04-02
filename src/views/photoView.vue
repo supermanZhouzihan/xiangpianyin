@@ -27,7 +27,7 @@
         multiple
         :max-size="40 * 1024 * 1024"
         @oversize="onOversize"
-        :max-count="2"
+        :max-count="4"
       >
         <van-button round color="rgb(241,241,241)" class="uploadBtn">
           上传照片
@@ -55,7 +55,6 @@
       <div v-for="item in currentImgInfo" :key="item.index" style="width:100%">
         <div :ref="'imageTofile' + item.index" class="virtualImgContainer">
           <img :src="item.imgUrl" alt="" class="cusimg" />
-          <div>{{ item.index }}</div>
           <div class="imginfo" v-if="item">
             <div class="text-left">
               <div>{{ item.Model }}</div>
@@ -69,7 +68,7 @@
               <div>
                 <div>
                   <span v-if="item.ExposureTime"
-                    >{{ item.FocalLengthIn35mmFilm }}mm f/{{ item.FNumber }}
+                    >{{ item.FocalLength }}mm f/{{ item.FNumber }}
                     {{
                       reduceFraction(
                         item.ExposureTime.numerator,
@@ -119,7 +118,7 @@
           <div>
             <div>
               <span v-if="currentImgInfo.ExposureTime"
-                >{{ currentImgInfo.FocalLengthIn35mmFilm }}mm f/{{
+                >{{ currentImgInfo.FocalLength }}mm f/{{
                   currentImgInfo.FNumber
                 }}
                 {{
@@ -154,9 +153,9 @@
       </div>
     </div> -->
 
-    <img v-show="isShow" :src="htmlUrl" alt="" />
+    <img v-for="item in htmlUrl" v-show="isShow" :src="item" :key="item.index" alt="" />
 
-    <van-uploader
+    <!-- <van-uploader
       :after-read="afterRead"
       :before-read="beforeRead"
       multiple
@@ -165,7 +164,7 @@
       :max-count="2"
     >
       <van-button icon="plus" type="primary">上传文件</van-button>
-    </van-uploader>
+    </van-uploader> -->
     <van-button @click="batchTofile">生成图片</van-button>
     <!-- <van-button @click="downloadImage">生成图片</van-button> -->
   </div>
@@ -183,7 +182,7 @@ export default {
       // currentImgUrlList: [],
       currentImgInfo: [],
       isShow: false,
-      htmlUrl: "",
+      htmlUrl: [],
       canvasImgUrl: "",
       renderOldImgXSize: "",
       renderOldImgYSize: "",
@@ -192,7 +191,9 @@ export default {
   // created() {
 
   // },
-  mounted() {},
+  mounted() {
+    this.getOpenId()
+  },
   methods: {
     //上传前
     beforeRead(file) {
@@ -250,6 +251,7 @@ export default {
       });
     },
     batchTofile(){
+      this.htmlUrl=[];
       this.currentImgInfo.map((item)=>{
         let ref='imageTofile'+[item.index];
         this.imgTofile(ref);
@@ -257,9 +259,13 @@ export default {
     },
     imgTofile(ref) {
       console.log('ref',ref)
-      let renderDom =this.$refs[ref];
+      let renderDom =this.$refs[ref][0];
+      console.log('rederDom',renderDom)
       let width = renderDom.offsetWidth;
       let height = renderDom.offsetHeight;
+
+      console.log('width',width)
+      console.log('height',height)
 
       let max = Math.max(width, height);
       let scale = parseInt(4000 / max);
@@ -267,7 +273,7 @@ export default {
 
       console.log("scale", scale);
 
-      html2canvas(this.$refs.imageTofile, {
+      html2canvas(this.$refs[ref][0], {
         backgroundColor: "#fff",
         scale: scale,
         // width: width*scale,
@@ -275,7 +281,7 @@ export default {
       })
         .then((canvas) => {
           let url = canvas.toDataURL("image/png");
-          this.htmlUrl = url;
+          this.htmlUrl.push(url);
           this.$nextTick(() => {
             this.isShow = true;
           });
@@ -330,6 +336,59 @@ export default {
       var gcd = this.findGCD(numerator, denominator);
       return numerator / gcd + "/" + denominator / gcd;
     },
+
+    getOpenId() {
+      let localOpendId = localStorage.getItem("wx_openId");
+      //本地是否有openId
+      if (localOpendId) {
+        this.wx_openId = localOpendId;
+        // this.getRecord();
+      } else {
+        this.login();
+      }
+    },
+    //wx登录
+    login() {
+      let openId = this.getHashSearchParam("openid");
+      if (openId == null || openId === "") {
+        let url =
+          (window.location.host == "https://www.xiangpianyin.com"
+            ? "https://www.xiangpianyin.com"
+            : "http://47.109.184.216:1234") +
+          "/api/wechat.base/oauth?redirect_url=" +
+          encodeURIComponent(window.location.href);
+        window.location.href = url;
+      } else {
+        this.wx_openId = openId;
+        localStorage.setItem("wx_openId", openId);
+        // this.getRecord();
+      }
+    },
+    getHashSearchParam(key) {
+      // const search = /(?<=#.*\?).*/.exec(location.href)?.[0];
+      // const usp = new URLSearchParams(search);
+      // return usp.get(key);
+      // 获取所有参数
+      var query = window.location.search.substring(1);
+      var hash = window.location.hash.substring(1);
+      // 如果锚点后面有参数，把锚点后面的参数加入到search参数中
+      if (hash.indexOf("?") > -1) {
+        query += "&" + hash.split("?")[1];
+      }
+      var key_values = query.split("&");
+      var params = {};
+      // 遍历参数并存入params对象
+      key_values.map(function (key_val) {
+        var key_val_arr = key_val.split("=");
+        params[key_val_arr[0]] = key_val_arr[1];
+      });
+      // 如果找到了key对应的参数，返回对应值
+      if (typeof params[key] != "undefined") {
+        return params[key];
+      }
+      // 如果没找到，返回空字符串
+      return "";
+    },
     // downloadImage() {
     //   const canvas = this.$refs.canvas;
     //   const dataURL = canvas.toDataURL("image/jpeg", 1.0);
@@ -380,9 +439,9 @@ export default {
   }
 
   div.virtualImgContainer {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
+    // position: absolute;
+    // top: -9999px;
+    // left: -9999px; 
     width: 100%;
 
     .cusimg {
