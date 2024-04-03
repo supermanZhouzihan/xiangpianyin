@@ -51,8 +51,8 @@
         alt=""
       />
     </div>
-    <div v-if="currentImgInfo && currentImgInfo.length > 0" style="width:100%">
-      <div v-for="item in currentImgInfo" :key="item.index" style="width:100%">
+    <div v-if="currentImgInfo && currentImgInfo.length > 0" style="width: 100%">
+      <div v-for="item in currentImgInfo" :key="item.index" style="width: 100%">
         <div :ref="'imageTofile' + item.index" class="virtualImgContainer">
           <img :src="item.imgUrl" alt="" class="cusimg" />
           <div class="imginfo" v-if="item">
@@ -153,7 +153,13 @@
       </div>
     </div> -->
 
-    <img v-for="item in htmlUrl" v-show="isShow" :src="item" :key="item.index" alt="" />
+    <img
+      v-for="item in htmlUrl"
+      v-show="isShow"
+      :src="item"
+      :key="item.index"
+      alt=""
+    />
 
     <!-- <van-uploader
       :after-read="afterRead"
@@ -172,13 +178,14 @@
 
 <script>
 import EXIF from "exif-js";
+import axios from "axios";
 import html2canvas from "html2canvas";
 
 export default {
   name: "PhotoView",
   data() {
     return {
-      baseUrl: process.env.VUE_APP_BASE_API_PURCHASE,
+      baseUrl: process.env.VUE_APP_BASE_API,
       // currentImgUrlList: [],
       currentImgInfo: [],
       isShow: false,
@@ -192,13 +199,13 @@ export default {
 
   // },
   mounted() {
-    this.getOpenId()
+    // this.getOpenId()
   },
   methods: {
     //上传前
     beforeRead(file) {
       // alert(file.type);
-      console.log("file", file);
+      console.log("beforeRead---------------------file", file);
       if (Array.isArray(file)) {
         let fileList = file;
         let findNoJpgPng = fileList.find(
@@ -210,7 +217,6 @@ export default {
         }
       } else {
         if (file.type !== "image/jpeg" && file.type !== "image/png") {
-          console.log(file.type, "image/png");
           alert("请上传 jpg / png格式图片");
           return false;
         }
@@ -220,58 +226,44 @@ export default {
     },
     //上传后
     afterRead(file) {
-      console.log("file", file);
+      console.log("afterRead---------------file", file);
       this.currentImgInfo = [];
       //多个文件
       if (Array.isArray(file)) {
         file.forEach((item, index) => {
-          console.log("item", item);
           this.getExifData(item, index);
-          // this.currentImgUrl = file.content;
-          // this.currentImgUrlList.push(item.content);
         });
       } else {
         this.getExifData(file, 0);
-        // this.currentImgUrlList.push(file.content);
       }
-      // console.log("list", this.currentImgUrlList);
     },
     getExifData(file, index) {
       //单个文件
       let that = this;
       EXIF.getData(file.file, function () {
-        console.log("getData", this);
         // 这里面可以看到值，想要什么直接获取即可。
         let currentImgInfo = EXIF.getAllTags(this);
-        console.log("currentImgInfo", currentImgInfo);
         currentImgInfo.imgUrl = file.content;
         currentImgInfo.index = index;
         that.currentImgInfo.push(currentImgInfo);
-        console.log("currentInfo", that.currentImgInfo);
       });
     },
-    batchTofile(){
-      this.htmlUrl=[];
-      this.currentImgInfo.map((item)=>{
-        let ref='imageTofile'+[item.index];
+    batchTofile() {
+      this.htmlUrl = [];
+      this.currentImgInfo.map((item) => {
+        let ref = "imageTofile" + [item.index];
+        console.log("执行imgTofile前", item.index);
         this.imgTofile(ref);
-      })
+        console.log("执行imgTofile后", item.index);
+      });
     },
     imgTofile(ref) {
-      console.log('ref',ref)
-      let renderDom =this.$refs[ref][0];
-      console.log('rederDom',renderDom)
+      let renderDom = this.$refs[ref][0];
       let width = renderDom.offsetWidth;
       let height = renderDom.offsetHeight;
 
-      console.log('width',width)
-      console.log('height',height)
-
       let max = Math.max(width, height);
       let scale = parseInt(4000 / max);
-      console.log("width", width, height);
-
-      console.log("scale", scale);
 
       html2canvas(this.$refs[ref][0], {
         backgroundColor: "#fff",
@@ -280,11 +272,51 @@ export default {
         // height:height*scale
       })
         .then((canvas) => {
-          let url = canvas.toDataURL("image/png");
-          this.htmlUrl.push(url);
-          this.$nextTick(() => {
-            this.isShow = true;
-          });
+          let imgUrl = canvas.toDataURL("image/png");
+          this.htmlUrl.push(imgUrl);
+          if (this.htmlUrl.length == this.currentImgInfo.length) {
+            let params = {
+              openId: "test001",
+              picList: [
+                {
+                  type: "png",
+                  num: this.htmlUrl.length,
+                },
+              ],
+            };
+            let url = this.baseUrl + "/back/createOssUploadUrl";
+            axios
+              .post(url, params)
+              .then((res) => {
+                if (res.data.code == 1) {
+                  console.log("上传成功", res);
+                  let list = res.data.data.urlList[0].url;
+                  console.log(list);
+                  for (let i = 0; i < list.length; i++) {
+                    axios
+                      .put(list[i], this.htmlUrl[i], {
+                        headers: {
+                          "Content-Type": "application/octet-stream",
+                        },
+                      })
+                      .then((res) => {
+                        console.log("cs", res);
+                      });
+                  }
+                  // console.log(list);
+                  // list.forEach(element => {
+                  // });
+                } else {
+                  this.$toast.fail(res.data.msg);
+                }
+              })
+              .catch(() => {
+                this.$toast.fail("接口请求失败，请稍后重试");
+              });
+          }
+          // this.$nextTick(() => {
+          //   this.isShow = true;
+          // });
         })
         .catch((err) => {
           console.log(err);
@@ -441,7 +473,7 @@ export default {
   div.virtualImgContainer {
     // position: absolute;
     // top: -9999px;
-    // left: -9999px; 
+    // left: -9999px;
     width: 100%;
 
     .cusimg {
