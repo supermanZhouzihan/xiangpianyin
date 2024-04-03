@@ -27,7 +27,9 @@ import {
   RadioGroup,
   Radio,
   Picker,
-  Uploader
+  Uploader,
+  Loading,
+  Lazyload
 } from 'vant';
 
 // import ElementUI from 'element-ui';
@@ -68,6 +70,8 @@ Vue.use(Picker);
 Vue.use(Toast);
 Vue.use(Dialog);
 Vue.use(Uploader);
+Vue.use(Loading);
+Vue.use(Lazyload);
 
 //挂载全局方法
 Vue.prototype.$moment = moment;

@@ -11,46 +11,28 @@
 <template>
   <div class="photoViewContainer">
     <div class="title">你好，摄影师！</div>
-    <div
-      style="
-        width: 94%;
-        background-color: rgb(33, 33, 33);
-        margin: 0 auto;
-        padding: 0.5rem;
+    <div style="
+        width: 100%;
         box-sizing: border-box;
         margin-bottom: 10px;
-      "
-    >
-      <van-uploader
-        :after-read="afterRead"
-        :before-read="beforeRead"
-        multiple
-        :max-size="40 * 1024 * 1024"
-        @oversize="onOversize"
-        :max-count="4"
-      >
-        <van-button round color="rgb(241,241,241)" class="uploadBtn">
-          上传照片
-        </van-button>
+      ">
+      <van-uploader :after-read="afterRead" :before-read="beforeRead" multiple :max-size="40 * 1024 * 1024"
+        @oversize="onOversize" :max-count="4">
+        <div style="width: 94%; background-color: rgb(33, 33, 33);margin: 0 auto 0.2rem;
+        padding: 0.5rem 0;">
+          <van-button round color="rgb(241,241,241)" class="uploadBtn">
+            上传照片
+          </van-button>
+        </div>
+        <div class="exampleList">
+          <img src="../assets/example.jpg" style="width: 100%; margin-bottom: 10px" alt="" />
+          <img src="../assets/example.jpg" style="width: 100%; margin-bottom: 10px" alt="" />
+          <img src="../assets/example.jpg" style="width: 100%; margin-bottom: 10px" alt="" />
+        </div>
       </van-uploader>
+
     </div>
-    <div class="exampleList">
-      <img
-        src="../assets/example.jpg"
-        style="width: 100%; margin-bottom: 10px"
-        alt=""
-      />
-      <img
-        src="../assets/example.jpg"
-        style="width: 100%; margin-bottom: 10px"
-        alt=""
-      />
-      <img
-        src="../assets/example.jpg"
-        style="width: 100%; margin-bottom: 10px"
-        alt=""
-      />
-    </div>
+
     <div v-if="currentImgInfo && currentImgInfo.length > 0" style="width: 100%">
       <div v-for="item in currentImgInfo" :key="item.index" style="width: 100%">
         <div :ref="'imageTofile' + item.index" class="virtualImgContainer">
@@ -67,33 +49,31 @@
               </div>
               <div>
                 <div>
-                  <span v-if="item.ExposureTime"
-                    >{{ item.FocalLength }}mm f/{{ item.FNumber }}
+                  <span v-if="item.ExposureTime">{{ item.FocalLength }}mm f/{{ item.FNumber }}
                     {{
-                      reduceFraction(
-                        item.ExposureTime.numerator,
-                        item.ExposureTime.denominator
-                      )
-                    }}
-                    ISO{{ item.ISOSpeedRatings }}</span
-                  >
+        reduceFraction(
+          item.ExposureTime.numerator,
+          item.ExposureTime.denominator
+        )
+      }}
+                    ISO{{ item.ISOSpeedRatings }}</span>
                 </div>
                 <div v-if="item.GPSLongitude" class="textBottom">
                   {{
-                    item.GPSLatitude[0] +
-                    "°" +
-                    item.GPSLatitude[1] +
-                    "′" +
-                    item.GPSLatitude[2] +
-                    "″N"
-                  }}
+        item.GPSLatitude[0] +
+        "°" +
+        item.GPSLatitude[1] +
+        "′" +
+        item.GPSLatitude[2] +
+        "″N"
+      }}
                   {{
-                    item.GPSLongitude[0] +
-                    "°" +
-                    item.GPSLongitude[1] +
-                    "′" +
-                    item.GPSLongitude[2] +
-                    "″E"
+          item.GPSLongitude[0] +
+          "°" +
+          item.GPSLongitude[1] +
+          "′" +
+          item.GPSLongitude[2] +
+                  "″E"
                   }}
                 </div>
               </div>
@@ -153,13 +133,7 @@
       </div>
     </div> -->
 
-    <img
-      v-for="item in htmlUrl"
-      v-show="isShow"
-      :src="item"
-      :key="item.index"
-      alt=""
-    />
+    <img v-for="item in htmlUrl" v-show="isShow" :src="item" :key="item.index" v-lazy="item" alt="" />
 
     <!-- <van-uploader
       :after-read="afterRead"
@@ -193,6 +167,7 @@ export default {
       canvasImgUrl: "",
       renderOldImgXSize: "",
       renderOldImgYSize: "",
+      batchId: ""
     };
   },
   // created() {
@@ -200,12 +175,30 @@ export default {
   // },
   mounted() {
     // this.getOpenId()
+    // console.log(this,this.$toast)
   },
   methods: {
     //上传前
     beforeRead(file) {
       // alert(file.type);
       console.log("beforeRead---------------------file", file);
+
+      // Toast.loading({
+      //   message: '加载中...',
+      //   duration: 0, 
+      //   forbidClick: true
+      // });
+
+      // console.log(this.this.$toast)
+
+      this.$toast({
+        type:'loading',
+        message:'加载中...',
+        duration:0,
+        forbidClick:true,
+        overlay:true
+      })
+
       if (Array.isArray(file)) {
         let fileList = file;
         let findNoJpgPng = fileList.find(
@@ -213,11 +206,13 @@ export default {
         );
         if (findNoJpgPng) {
           alert("请上传 jpg / png格式图片");
+          this.$toast.clear()
           return false;
         }
       } else {
         if (file.type !== "image/jpeg" && file.type !== "image/png") {
           alert("请上传 jpg / png格式图片");
+          this.$toast.clear()
           return false;
         }
       }
@@ -246,15 +241,22 @@ export default {
         currentImgInfo.imgUrl = file.content;
         currentImgInfo.index = index;
         that.currentImgInfo.push(currentImgInfo);
+        // if(that.currentImgInfo)
       });
     },
     batchTofile() {
       this.htmlUrl = [];
+      console.log('执行了')
+      this.$toast({
+        type:'loading',
+        message:'加载中...',
+        duration:0,
+        forbidClick:true,
+        overlay:true
+      })
       this.currentImgInfo.map((item) => {
         let ref = "imageTofile" + [item.index];
-        console.log("执行imgTofile前", item.index);
         this.imgTofile(ref);
-        console.log("执行imgTofile后", item.index);
       });
     },
     imgTofile(ref) {
@@ -284,30 +286,35 @@ export default {
                 },
               ],
             };
-            let url = this.baseUrl + "/back/createOssUploadUrl";
+            let ossUploadUrl = this.baseUrl + "/back/createOssUploadUrl";
             axios
-              .post(url, params)
+              .post(ossUploadUrl, params)
               .then((res) => {
                 if (res.data.code == 1) {
-                  console.log("上传成功", res);
                   let list = res.data.data.urlList[0].url;
-                  console.log(list);
+                  this.batchId = res.data.data.batchId;
+                  let ossStatus = [];
                   for (let i = 0; i < list.length; i++) {
                     axios
-                      .put(list[i], this.htmlUrl[i], {
+                      .put(list[i], this.base64ToFile(this.htmlUrl[i]), {
                         headers: {
                           "Content-Type": "application/octet-stream",
                         },
                       })
                       .then((res) => {
-                        console.log("cs", res);
+                        ossStatus.push(res.status)
                       });
                   }
-                  // console.log(list);
-                  // list.forEach(element => {
-                  // });
+                  let reportUrl = this.baseUrl + "/back/reportUpload";
+                  let findHaveFail = ossStatus.find((item) => item != 200);//是否有上传失败的
+                  axios.post(reportUrl, { batchId: this.batchId, code: findHaveFail ? -1 : 1,openId:"test001" }).then((res) => {
+                    console.log("全部上传成功wahhh");
+                    
+                    this.$toast.clear();
+                  })
                 } else {
                   this.$toast.fail(res.data.msg);
+                  
                 }
               })
               .catch(() => {
@@ -320,6 +327,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+          this.$toast.clear();
         });
     },
     onOversize(file) {
@@ -459,7 +467,7 @@ export default {
   }
 
   .uploadBtn {
-    width: 100%;
+    width: 90%;
     color: rgb(0, 0, 0) !important;
     font-size: 0.6rem;
     padding: 0.6rem;
@@ -507,7 +515,7 @@ export default {
     }
   }
 
-  > div.imgContainer {
+  >div.imgContainer {
     width: 80%;
     margin: 0 auto;
 
