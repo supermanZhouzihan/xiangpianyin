@@ -144,7 +144,7 @@
     >
       <van-button icon="plus" type="primary">上传文件</van-button>
     </van-uploader> -->
-    <van-button @click="batchTofile">生成图片</van-button>
+    <!-- <van-button @click="batchTofile">生成图片</van-button>  -->
     <!-- <van-button @click="downloadImage">生成图片</van-button> -->
   </div>
 </template>
@@ -286,7 +286,7 @@ export default {
       let height = renderDom.offsetHeight;
 
       let max = Math.max(width, height);
-      let scale = parseInt(3000 / max);
+      let scale = parseInt(4000 / max);
 
       html2canvas(this.$refs[ref][0], {
         backgroundColor: "#fff",
@@ -327,14 +327,7 @@ export default {
                         },
                       })
                       .then((res) => {
-                        if (i == 0) {
-                          ossStatus.push(500)
-                          console.log("进这里")
-                        }
-                        else {
-                          ossStatus.push(res.status)
-                          console.log("进这里1")
-                        }
+                        ossStatus.push(res.status)
                         if (ossStatus.length == list.length) {
                           console.timeEnd("计时器3")
                           console.log('ossStatus', ossStatus)
@@ -343,23 +336,28 @@ export default {
                           console.log('进这里2findHaveFail', findHaveFail)
                           console.time("计时器4")
                           axios.post(reportUrl, { batchId: this.batchId, code: findHaveFail ? -1 : 1, openId: "test001" }).then((res) => {
-                            console.log("全部上传成功wahhh");
                             console.timeEnd('计时器4')
                             this.$toast.clear();
                           })
                         }
 
+                      }).catch((err)=>{
+                        this.$toast.clear();
+                        this.$toast({
+                          type:'fail',
+                          message:'上传失败，请稍后重试',
+                        })
                       });
                   }
-
                 } else {
-                  this.$toast.fail(res.data.msg);
-
+                  this.$toast({
+                    type:'fail',
+                    message:res.msg
+                  });
                 }
               })
               .catch((err) => {
-                console.log(err)
-                this.$toast.fail("接口请求失败，请稍后重试");
+                this.$toast.fail("上传失败，请稍后重试");
               });
           }
           // this.$nextTick(() => {
