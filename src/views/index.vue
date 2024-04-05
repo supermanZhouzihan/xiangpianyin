@@ -9,310 +9,446 @@
 !-->
 
 <template>
-  <div class="login">
-    <div class="top">
-      <img
-        src="../assets/ty.png"
-        alt=""
-        width="70px"
-        height="70px"
-        style="margin-bottom: 10px"
-      />
-      <div class="title mb10">天宇食品品鉴会</div>
-      <div>报名表</div>
+  <div class="photoViewContainer">
+    <div class="title">你好，摄影师！</div>
+    <div style="
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+      ">
+      <van-uploader :after-read="afterRead" :before-read="beforeRead" multiple :max-size="40 * 1024 * 1024"
+        @oversize="onOversize" :max-count="4">
+        <div style="width: 94%; background-color: rgb(33, 33, 33);margin: 0 auto 0.2rem;
+        padding: 0.5rem 0;">
+          <van-button round color="rgb(241,241,241)" class="uploadBtn">
+            上传照片
+          </van-button>
+        </div>
+        <div class="exampleList">
+          <img src="../assets/example.jpg" style="width: 100%; margin-bottom: 10px" alt="" />
+          <img src="../assets/example.jpg" style="width: 100%; margin-bottom: 10px" alt="" />
+          <img src="../assets/example.jpg" style="width: 100%; margin-bottom: 10px" alt="" />
+        </div>
+      </van-uploader>
     </div>
+    <div v-if="currentImgInfo && currentImgInfo.length > 0" style="width: 100%" class="virtualCanvasDom">
+      <div v-for="item in currentImgInfo" :key="item.index" style="width: 100%">
+        <div :ref="'imageTofile' + item.index" class="virtualImgContainer">
+          <img :src="item.imgUrl" alt="" class="cusimg" />
+          <div class="imginfo" v-if="item">
+            <div class="text-left">
+              <div>{{ item.Model }}</div>
+              <div class="textBottom">{{ item.DateTime }}</div>
+            </div>
 
-    <div class="content">
-      <van-form @submit="onSubmit" :disabled="isAlreadySubmit" ref="submitForm">
-        <van-cell required>
-          <template #title>
-            <div class="custom-title">我是</div>
-          </template>
-          <van-radio-group
-            v-model="form.member_type"
-            direction="horizontal"
-            :disabled="isAlreadySubmit"
-          >
-            <van-radio name="1">客户</van-radio>
-            <van-radio name="2">供应商</van-radio>
-          </van-radio-group>
-        </van-cell>
-        <van-cell required v-show="form.member_type == 1">
-          <template #title>
-            <div class="custom-title">状态</div>
-          </template>
-          <van-radio-group
-            v-model="form.status"
-            direction="horizontal"
-            :disabled="isAlreadySubmit"
-          >
-            <van-radio name="2">待合作</van-radio>
-            <van-radio name="1">已合作</van-radio>
-          </van-radio-group>
-        </van-cell>
-        <van-field
-          v-model="form.name"
-          name="name"
-          required
-          label="姓名"
-          :rules="[{ required: true, message: '请输入姓名' }]"
-          ref="name"
-          @click="clickFocus('name')"
-        />
-        <van-field
-          v-model="form.phone"
-          name="phone"
-          label="电话"
-          required
-          :rules="[{ required: true, message: '请输入电话' }]"
-          ref="phone"
-          @click="clickFocus('phone')"
-          type="tel"
-        />
-        <van-field
-          v-model="form.region"
-          is-link
-          readonly
-          label="地区"
-          @click="openDialog"
-          name="region"
-          ref="region"
-          required
-          :rules="[{ required: true, message: '请选择所属区域' }]"
-        />
-        <van-field
-          v-model="form.merchant_name"
-          name="merchant_name"
-          :label="form.member_type == 1 ? '商户名称' : '供应商名称'"
-          ref="merchant_name"
-          @click="clickFocus('merchant_name')"
-        />
-        <van-field
-          readonly
-          clickable
-          label="业态"
-          :value="form.commercial"
-          @click="showPicker = true"
-        />
-
-        <!-- <van-field
-          v-model="form.address"
-          name="address"
-          label="详细地址"
-          required
-          :rules="[{ required: true, message: '请输入详细地址' }]"
-        /> -->
-        <!-- <van-field
-          v-model="form.status"
-          name="status"
-          label="合作状态"
-          required
-          :rules="[{ required: true, message: '请选择合作状态' }]"
-        /> -->
-
-        <van-field
-          v-model="form.message"
-          name="message"
-          label="留言"
-          ref="message"
-          @click="clickFocus('message')"
-        />
-        <div></div>
-      </van-form>
-    </div>
-    <div class="cusBtn" v-if="!isAlreadySubmit">
-      <van-button
-        round
-        block
-        type="info"
-        native-type="submit"
-        @click="clickSubmitBtn"
-        >提交</van-button
-      >
-      <!-- <a href="alipays://">打开支付宝</a>
-          <a href="weixin://">打开微信</a> -->
-    </div>
-
-    <!-- <van-button @click="goWx"> 登录 </van-button> -->
-    <div class="cusBtn" v-if="isAlreadySubmit">
-      <div class="title mb5"><van-icon name="success" />已报名</div>
-      <div @click="resetForm" style="color: #0b80f7; font-size: 0.42rem">
-        <van-icon name="replay" />重新填写
+            <div class="text-left flexBetween" style="align-items: center">
+              <div class="makeLogo">
+                <img src="../assets/logo.png" alt="" style="width: 0.5rem" />
+              </div>
+              <div>
+                <div>
+                  <span v-if="item.ExposureTime">{{ item.FocalLength }}mm f/{{ item.FNumber }}
+                    {{
+        reduceFraction(
+          item.ExposureTime.numerator,
+          item.ExposureTime.denominator
+        )
+      }}
+                    ISO{{ item.ISOSpeedRatings }}</span>
+                </div>
+                <div v-if="item.GPSLongitude" class="textBottom">
+                  {{
+        item.GPSLatitude[0] +
+        "°" +
+        item.GPSLatitude[1] +
+        "′" +
+        item.GPSLatitude[2] +
+        "″N"
+      }}
+                  {{
+          item.GPSLongitude[0] +
+          "°" +
+          item.GPSLongitude[1] +
+          "′" +
+          item.GPSLongitude[2] +
+                  "″E"
+                  }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <van-popup v-model="show" round position="bottom">
-      <van-cascader
-        v-model="cascaderValue"
-        title="请选择所在地区"
-        :options="options"
-        @close="show = false"
-        @finish="onFinish"
-      />
-    </van-popup>
 
-    <van-popup v-model="showPicker" round position="bottom">
-      <van-picker
-        show-toolbar
-        :columns="categoryList"
-        @cancel="showPicker = false"
-        @confirm="onConfirm"
-      />
-    </van-popup>
+
+    <!-- <div class="imgContainer">
+      <img :src="currentImgUrl" alt="" class="cusimg" />
+      <div class="imginfo" v-if="currentImgInfo">
+        <div class="text-left">
+          <div>{{ currentImgInfo.Model }}</div>
+          <div class="textBottom">{{ currentImgInfo.DateTime }}</div>
+        </div>
+
+        <div class="text-left flexBetween" style="align-items: center">
+          <div class="makeLogo">
+            <img src="../assets/logo.png" alt="" style="width: 0.5rem" />
+          </div>
+          <div>
+            <div>
+              <span v-if="currentImgInfo.ExposureTime"
+                >{{ currentImgInfo.FocalLength }}mm f/{{
+                  currentImgInfo.FNumber
+                }}
+                {{
+                  reduceFraction(
+                    currentImgInfo.ExposureTime.numerator,
+                    currentImgInfo.ExposureTime.denominator
+                  )
+                }}
+                ISO{{ currentImgInfo.ISOSpeedRatings }}</span
+              >
+            </div>
+            <div v-if="currentImgInfo.GPSLongitude" class="textBottom">
+              {{
+                currentImgInfo.GPSLatitude[0] +
+                "°" +
+                currentImgInfo.GPSLatitude[1] +
+                "′" +
+                currentImgInfo.GPSLatitude[2] +
+                "″N"
+              }}
+              {{
+                currentImgInfo.GPSLongitude[0] +
+                "°" +
+                currentImgInfo.GPSLongitude[1] +
+                "′" +
+                currentImgInfo.GPSLongitude[2] +
+                "″E"
+              }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <img v-for="item in htmlUrl" v-show="isShow" :src="item" :key="item.index" v-lazy="item" alt="" />
+
+    <!-- <van-uploader
+      :after-read="afterRead"
+      :before-read="beforeRead"
+      multiple
+      :max-size="40 * 1024 * 1024"
+      @oversize="onOversize"
+      :max-count="2"
+    >
+      <van-button icon="plus" type="primary">上传文件</van-button>
+    </van-uploader> -->
+    <van-button @click="batchTofile">生成图片</van-button>
+    <!-- <van-button @click="downloadImage">生成图片</van-button> -->
   </div>
 </template>
 
 <script>
+import EXIF from "exif-js";
 import axios from "axios";
-import { region, categoryList } from "@/utils/generator/options.js";
-// import {
-//   formatDate,
-// } from "@/utils/generator/dateTimeConfig.js";
+import html2canvas from "html2canvas";
 
 export default {
-  name: "Index",
+  name: "PhotoView",
   data() {
     return {
-      baseUrl: process.env.VUE_APP_BASE_API_PURCHASE,
-      form: {
-        name: "",
-        phone: "",
-        region: "",
-        merchant_name: "",
-        status: "2",
-        message: "",
-        openId: "",
-        member_type: "1",
-        commercial:"",
-        // address: "",
-      },
-      recordInviter:"",//详情中的邀请人
-      inviter:"",//当前邀请人
-      cascaderValue: "",
-      show: false,
-      showPicker:false,
-      options: [],
-      isAlreadySubmit: false,
-      regionOptions: region,
-      categoryList: categoryList,
+      baseUrl: process.env.VUE_APP_BASE_API,
+      // currentImgUrlList: [],
+      currentImgInfo: [],
+      isShow: false,
+      htmlUrl: [],
+      canvasImgUrl: "",
+      renderOldImgXSize: "",
+      renderOldImgYSize: "",
+      batchId: "",
+      currentImgInfoLength: 0,
     };
   },
   // created() {
 
   // },
   mounted() {
-    //格式化省市区数据
-    this.getOpenId();
-    this.options = this.formateData(this.regionOptions);
-    this.inviter = decodeURI(this.getHashSearchParam("inviteName")); //当前邀请人姓名
-    console.log('inviter',this.inviter)
-    this.needSignIn = this.$route.query.needSignIn;
+    // this.getOpenId()
+    // console.log(this,this.$toast)
   },
+
   methods: {
-    onSubmit() {
-      let url = this.baseUrl + "/api/Tasting/addTasting";
-      let params = {
-        name: this.form.name,
-        phone: this.form.phone,
-        merchant_name: this.form.merchant_name,
-        province: this.form.province,
-        city: this.form.city,
-        area: this.form.area,
-        // address: this.form.address,
-        status: this.form.status,
-        message: this.form.message,
-        round_code: this.form.round_code,
-        openid: this.form.openId,
-        member_type: this.form.member_type,
 
-        commercial:this.form.commercial,
-        inviter:this.inviter?this.inviter:this.recordInviter?this.recordInviter:""
-      };
-      if (this.currentId) {
-        params.id = this.currentId;
+    //上传前
+    beforeRead(file) {
+      // alert(file.type);
+      console.log("beforeRead---------------------file", file);
+      console.time("计时器0");
+
+      // Toast.loading({
+      //   message: '加载中...',
+      //   duration: 0, 
+      //   forbidClick: true
+      // });
+
+      // console.log(this.this.$toast)
+
+      this.$toast({
+        type: 'loading',
+        message: '加载中...',
+        duration: 0,
+        forbidClick: true,
+        overlay: true
+      })
+
+      if (Array.isArray(file)) {
+        let fileList = file;
+        let findNoJpgPng = fileList.find(
+          (item) => item.type !== "image/jpeg" && item.type !== "image/png"
+        );
+        if (findNoJpgPng) {
+          alert("请上传 jpg / png格式图片");
+          this.$toast.clear()
+          return false;
+        }
+      } else {
+        if (file.type !== "image/jpeg" && file.type !== "image/png") {
+          alert("请上传 jpg / png格式图片");
+          this.$toast.clear()
+          return false;
+        }
       }
-      axios
-        .post(url, params)
-        .then((res) => {
-          if (res.data.code == 0) {
-            this.$toast.success("操作成功");
-            this.isAlreadySubmit = true;
-            this.currentId = res.data.data.id;
-            localStorage.setItem("signUp_formId", this.currentId);
-            localStorage.setItem("signUp_isAlreadySubmit", 1);
-            localStorage.setItem("signUp_form", JSON.stringify(this.form));
 
-            if (this.needSignIn) {
-              this.signIn();
-            }
-          } else {
-            this.$toast.fail(res.data.msg);
+      return true;
+    },
+    //上传后
+    afterRead(file) {
+      console.log("afterRead---------------file", file);
+      this.currentImgInfo = [];
+
+      //多个文件
+      if (Array.isArray(file)) {
+        this.currentImgInfoLength = file.length;
+        file.forEach((item, index) => {
+          this.getExifData(item, index);
+        });
+      } else {
+        this.getExifData(file, 0);
+        this.currentImgInfoLength = 1
+      }
+      console.timeEnd("计时器0");
+      console.time("计时器1")
+    },
+    getExifData(file, index) {
+      //单个文件
+      let that = this;
+      EXIF.getData(file.file, function () {
+        // 这里面可以看到值，想要什么直接获取即可。
+        let currentImgInfo = EXIF.getAllTags(this);
+        currentImgInfo.imgUrl = file.content;
+        currentImgInfo.index = index;
+        that.currentImgInfo.push(currentImgInfo);
+        if (that.currentImgInfo.length == that.currentImgInfoLength) {
+          // that.$toast.clear();
+
+          that.$nextTick(() => {
+            console.timeEnd("计时器1");
+            that.batchTofile();
+
+          })
+        }
+        // if(that.currentImgInfo)
+      });
+    },
+    batchTofile() {
+      this.htmlUrl = [];
+      console.log('执行了')
+      console.time("计时器2");
+      // this.$toast({
+      //   type:'loading',
+      //   message:'加载中...',
+      //   duration:0,
+      //   forbidClick:true,
+      //   overlay:true
+      // })
+
+      this.currentImgInfo.forEach((item)=>{
+        let ref = "imageTofile" + [item.index];
+        this.imgTofile(ref);
+      })
+
+    },
+    imgTofile(ref) {
+      console.log(ref)
+      let renderDom = this.$refs[ref][0];
+      let width = renderDom.offsetWidth;
+      let height = renderDom.offsetHeight;
+
+      let max = Math.max(width, height);
+      let scale = parseInt(3000 / max);
+
+      html2canvas(this.$refs[ref][0], {
+        backgroundColor: "#fff",
+        scale: scale,
+        // width: width*scale,
+        // height:height*scale
+      })
+        .then((canvas) => {
+          let imgUrl = canvas.toDataURL("image/png");
+          this.htmlUrl.push(imgUrl);
+          if (this.htmlUrl.length == this.currentImgInfo.length) {
+            console.timeEnd("计时器2");
+            let params = {
+              openId: "test001",
+              picList: [
+                {
+                  type: "png",
+                  num: this.htmlUrl.length,
+                },
+              ],
+            };
+            let ossUploadUrl = this.baseUrl + "/back/createOssUploadUrl";
+            axios
+              .post(ossUploadUrl, params)
+              .then((res) => {
+                if (res.data.code == 1) {
+                  let list = res.data.data.urlList[0].url;
+                  this.batchId = res.data.data.batchId;
+                  let ossStatus = [];
+                  // 循环上传oss
+                  console.time("计时器3")
+                  console.log("执行了11111111111", list)
+                  for (let i = 0; i < list.length; i++) {
+                    axios
+                      .put(list[i], this.base64ToFile(this.htmlUrl[i]), {
+                        headers: {
+                          "Content-Type": "application/octet-stream",
+                        },
+                      })
+                      .then((res) => {
+                        if (i == 0) {
+                          ossStatus.push(500)
+                          console.log("进这里")
+                        }
+                        else {
+                          ossStatus.push(res.status)
+                          console.log("进这里1")
+                        }
+                        if (ossStatus.length == list.length) {
+                          console.timeEnd("计时器3")
+                          console.log('ossStatus', ossStatus)
+                          let reportUrl = this.baseUrl + "/back/reportUpload";
+                          let findHaveFail = ossStatus.find(item => item != 200);//是否有上传失败的
+                          console.log('进这里2findHaveFail', findHaveFail)
+                          console.time("计时器4")
+                          axios.post(reportUrl, { batchId: this.batchId, code: findHaveFail ? -1 : 1, openId: "test001" }).then((res) => {
+                            console.log("全部上传成功wahhh");
+                            console.timeEnd('计时器4')
+                            this.$toast.clear();
+                          })
+                        }
+
+                      });
+                  }
+
+                } else {
+                  this.$toast.fail(res.data.msg);
+
+                }
+              })
+              .catch((err) => {
+                console.log(err)
+                this.$toast.fail("接口请求失败，请稍后重试");
+              });
           }
+          // this.$nextTick(() => {
+          //   this.isShow = true;
+          // });
         })
-        .catch(() => {
-          this.$toast.fail("接口请求失败，请稍后重试");
+        .catch((err) => {
+          console.log(err);
+          this.$toast.clear();
         });
     },
-    clickSubmitBtn() {
-      this.$refs.submitForm.submit();
+    onOversize(file) {
+      console.log(file);
+      alert("文件大小不能超过 40mb");
     },
-    //根据openId查询详情
-    getRecord() {
-      let url = this.baseUrl + "/api/Tasting/getSignupByOpenid";
-      axios
-        .post(url, { openid: this.form.openId })
-        .then((res) => {
-          if (res.data.code == 0) {
-            if (res.data.data && res.data.data.id) {
-              let data = res.data.data;
-              this.form.area = data.area;
-              this.form.city = data.city;
-              this.form.merchant_name = data.merchant_name;
-              this.form.message = data.message;
-              this.form.name = data.name;
-              this.form.openId = data.openId;
-              this.form.phone = data.phone;
-              this.form.province = data.province;
-              this.form.region =
-                data.province + "/" + data.city + "/" + data.area;
-              this.form.round_code = data.round_code;
-              this.form.status = data.status + "";
-              this.form.member_type = data.member_type + "";
-
-              this.form.commercial=data.commercial;//业态
-              this.recordInviter=data.inviter;
-
-              this.isAlreadySubmit = true;
-
-              this.currentId = data.id;
-            } else {
-              this.isAlreadySubmit = false;
-            }
-
-            // this.form.area=''
-          } else {
-            this.$toast.fail(res.data.msg);
-          }
-        })
-        .catch(() => {
-          this.$toast.fail("接口请求失败，请稍后重试");
-        });
+    base64ToFile: function (urlData, fileName) {
+      let arr = urlData.split(",");
+      let mime = arr[0].match(/:(.*?);/)[1];
+      let bytes = atob(arr[1]);
+      let n = bytes.length;
+      let ia = new Uint8Array(n);
+      while (n--) {
+        ia[n] = bytes.charCodeAt(n);
+      }
+      return new File([ia], fileName, { type: mime });
     },
+    drawImage(imgUrl) {
+      const canvas = this.$refs.canvas;
+      const ctx = canvas.getContext("2d");
+      const image = new Image();
+
+      image.onload = () => {
+        canvas.width = image.width;
+        canvas.height = image.height;
+        // 绘制图片
+        ctx.drawImage(image, 0, 0);
+
+        ctx.fillStyle = "red";
+        ctx.fillRect(10, 10, 50, 50);
+      };
+
+      image.src = imgUrl; // 替换为你的图片路径
+    },
+    //找到分子分母的最大公约数
+    findGCD(num1, num2) {
+      while (num2 !== 0) {
+        var temp = num2;
+        num2 = num1 % num2;
+        num1 = temp;
+      }
+      return num1;
+    },
+    //分子分母到最简形式 numerator分子 denominator分母
+    reduceFraction(numerator, denominator) {
+      var gcd = this.findGCD(numerator, denominator);
+      return numerator / gcd + "/" + denominator / gcd;
+    },
+
     getOpenId() {
-      let localOpendId = localStorage.getItem("signUp_openId");
+      let localOpendId = localStorage.getItem("wx_openId");
       //本地是否有openId
       if (localOpendId) {
-        this.form.openId = localOpendId;
-        this.getRecord();
+        this.wx_openId = localOpendId;
+        // this.getRecord();
       } else {
-        // this.login();
+        this.login();
       }
     },
-    //hash模式下的 判断公众号截取code
+    //wx登录
+    login() {
+      let openId = this.getHashSearchParam("openid");
+      if (openId == null || openId === "") {
+        let url =
+          (window.location.host == "https://www.xiangpianyin.com"
+            ? "https://www.xiangpianyin.com"
+            : "http://47.109.184.216:1234") +
+          "/api/wechat.base/oauth?redirect_url=" +
+          encodeURIComponent(window.location.href);
+        window.location.href = url;
+      } else {
+        this.wx_openId = openId;
+        localStorage.setItem("wx_openId", openId);
+        // this.getRecord();
+      }
+    },
     getHashSearchParam(key) {
       // const search = /(?<=#.*\?).*/.exec(location.href)?.[0];
       // const usp = new URLSearchParams(search);
       // return usp.get(key);
-
       // 获取所有参数
       var query = window.location.search.substring(1);
       var hash = window.location.hash.substring(1);
@@ -334,242 +470,131 @@ export default {
       // 如果没找到，返回空字符串
       return "";
     },
-    //wx登录
-    login() {
-      let openId = decodeURI(this.getHashSearchParam("openid")); //openId
-      
-      if (openId == null || openId === "") {
-        let url =
-          (window.location.host == "https://pro.scm.tysp.com"
-            ? "https://pro.scm.tysp.com"
-            : "http://47.108.149.12:8009") +
-          "/api/wechat.base/oauth?redirect_url=" +
-          encodeURIComponent(window.location.href);
-        window.location.href = url;
-      } else {
-        this.form.openId = openId;
-        localStorage.setItem("signUp_openId", openId);
-        this.getRecord();
-      }
-    },
-    // getSignInfo() {
-    //   let url = this.baseUrl + "/api/Tasting/getActiveRound";
-    //   axios
-    //     .get(url)
-    //     .then((res) => {
-    //       if (res.data.code == 0) {
-    //         this.round_code = res.data.data.round_code;
-    //         if (this.round_code != this.form.round_code) {
-    //           this.resetForm();
-    //           this.currentId = "";
-    //         }
-    //       } else {
-    //         this.$toast.fail(res.data.msg);
-    //       }
-    //     })
-    //     .catch(() => {
-    //       this.$toast.fail("接口请求失败，请稍后重试");
-    //     });
+    // downloadImage() {
+    //   const canvas = this.$refs.canvas;
+    //   const dataURL = canvas.toDataURL("image/jpeg", 1.0);
+
+    //   const link = document.createElement("a");
+    //   link.href = dataURL;
+    //   this.canvasImgUrl = dataURL;
+    //   link.download = "my-image.jpeg";
+    //   link.click();
     // },
-    // getLocalInfo() {
-    //   let info = localStorage.getItem("signUp_form");
-    //   let currentId = localStorage.getItem("signUp_formId");
-    //   let isAlreadySubmit = localStorage.getItem("signUp_isAlreadySubmit");
-    //   if (info) {
-    //     this.form = JSON.parse(info);
-    //   }
-    //   this.isAlreadySubmit = isAlreadySubmit ? true : false;
-    //   this.currentId = currentId ? currentId : "";
-    // },
-    //格式化省市区
-    formateData(data) {
-      let newArr = [];
-      for (var index = 0; index < data.length; index++) {
-        data[index].value = data[index].i;
-        data[index].text = data[index].n;
-        if (data[index].p == 0) {
-          data[index].children = [];
-          newArr.push(data[index]);
-        }
-      }
-      for (var i = 0; i < data.length; i++) {
-        let findItem = newArr.find((item) => item.i == data[i].p);
-        data[i].children = [];
-        if (findItem) {
-          findItem.children.push(data[i]);
-        }
-      }
-      newArr.map((item, index) => {
-        if (item.children && item.children.length > 0) {
-          item.children.map((items) => {
-            let findItems = data.filter((items1) => items1.p == items.i);
-            if (findItems && findItems.length > 0) {
-              findItems.map((i) => {
-                if (i.children) {
-                  delete i.children;
-                }
-              });
-              items.children.push(...findItems);
-            }
-          });
-        }
-      });
-      //四川51、重庆50、云南53、贵州52
-
-      let SiChuanItem = newArr.find((item) => item.value == 51);
-      let ChongQingItem = newArr.find((item) => item.value == 50);
-      // let GuiZhouItem=newArr.find(item=>item.value==52);
-      // let YunNanItem=newArr.find(item=>item.value==53);
-
-      let newArrList = newArr.filter(
-        (item) => item.value > 51 || item.value < 50
-      );
-
-      if (SiChuanItem && ChongQingItem) {
-        newArrList = [SiChuanItem, ChongQingItem, ...newArrList];
-      }
-      return newArrList || newArr;
-    },
-    //重置表单
-    resetForm() {
-      this.form = {
-        name: "",
-        phone: "",
-        region: "",
-        merchant_name: "",
-        status: "2",
-        message: "",
-        round_code: this.round_code,
-        openId: localStorage.getItem("signUp_openId"),
-        member_type: "1",
-        commercial:"",
-      };
-
-      this.isAlreadySubmit = false;
-    },
-
-    signIn() {
-      let url = this.baseUrl + "/api/Tasting/tastingSign";
-      let params = {
-        id: this.currentId,
-        is_sign: 1,
-      };
-      axios
-        .post(url, params)
-        .then((res) => {
-          if (res.data.code == 0) {
-            localStorage.setItem("signUp_alreadySignIn", true);
-            this.$router.push({
-              name: "signIn",
-            });
-          } else {
-            this.$toast.fail(res.data.msg);
-          }
-        })
-        .catch(() => {
-          this.$toast.fail("接口请求失败，请稍后重试");
-        });
-    },
-    onFinish({ selectedOptions }) {
-      this.show = false;
-      this.form.region = selectedOptions.map((option) => option.text).join("/");
-      this.form.province = selectedOptions[0].text;
-      this.form.city = selectedOptions[1].text;
-      this.form.area = selectedOptions[2].text;
-    },
-    onConfirm(value){
-      this.form.commercial = value;
-      this.showPicker = false
-    },
-    openDialog() {
-      if (this.isAlreadySubmit) {
-        return;
-      }
-      this.show = true;
-    },
-    clickFocus(ref) {
-      this.$refs[ref].focus();
-    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.login {
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  background-image: url(https://tysp-pro.oss-cn-chengdu.aliyuncs.com/static/wx/img/loginBack.png);
-  background-position: center bottom;
-  background-repeat: no-repeat;
-  background-clip: content-box;
-  background-size: cover;
-  overflow-y: auto;
-}
-.top {
-  position: relative;
-  left: 0;
-  top: 1.28rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.photoViewContainer {
   font-size: 0.42rem;
-  font-weight: 700;
-  color: #646566;
-  margin-bottom: 2.13rem;
-}
+  background-color: black;
 
-.content {
-  // position: relative;
-  // top: 2.13rem;
-  width: 80%;
-  margin: 0 auto 1rem;
-  .van-cell {
-    background-color: transparent;
-    font-size: 0.42rem;
-    margin-bottom: 0.2rem;
-    line-height: 0.64rem;
-  }
-  .van-cell::after {
-    border-bottom: 1px solid #000;
-  }
-  .van-cell__title {
-    flex: none;
-    width: 26%;
-    text-align: right;
-  }
-
-  .van-cell__value {
-    width: 74%;
+  .title {
     text-align: left;
-    line-height: 0.64rem;
+    padding: 0.42rem 1rem;
+    color: #fff;
   }
-  .van-form ::v-deep {
-    .van-field--disabled .van-field__label,
-    .van-field__control:disabled {
-      color: #000 !important;
-      -webkit-text-fill-color: #000 !important;
+
+  .cusUpload.van-uploader ::v-deep {
+    width: 100%;
+
+    .van-uploader__wrapper {
+      width: 100%;
+
+      .van-uploader__input-wrapper {
+        width: 100%;
+      }
     }
   }
-  .van-radio-group--horizontal {
-    height: 100%;
-  }
-  .custom-title {
-    text-align: left;
-  }
-}
-.cusBtn {
-  // position: absolute;
-  // bottom: .5rem;
-  // left: 50%;
-  // transform: translateX(-50%);
 
-  width: 80%;
-  margin: 0 auto 0.2rem;
-}
-.title {
-  font-size: 0.53rem;
-  color: #000;
+  .uploadBtn {
+    width: 90%;
+    color: rgb(0, 0, 0) !important;
+    font-size: 0.6rem;
+    padding: 0.6rem;
+  }
+
+  .exampleList {
+    width: 92%;
+    margin: 0 auto;
+  }
+
+  div.virtualImgContainer {
+    // position: absolute;
+    // top: -9999px;
+    // left: -9999px;
+    width: 100%;
+
+    .cusimg {
+      width: 100%;
+    }
+
+    .imginfo {
+      width: 100%;
+      padding: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.3rem;
+      box-sizing: border-box;
+      font-weight: 700;
+
+      .makeLogo {
+        padding: 10px;
+
+        img {
+          border-right: 1px solid #ccc;
+          padding-right: 10px;
+        }
+      }
+
+      .textBottom {
+        font-size: 0.26rem;
+        color: #ccc;
+        font-weight: 500;
+      }
+    }
+  }
+
+  >div.imgContainer {
+    width: 80%;
+    margin: 0 auto;
+
+    .cusimg {
+      width: 100%;
+    }
+
+    .imginfo {
+      width: 100%;
+      padding: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.3rem;
+      box-sizing: border-box;
+      font-weight: 700;
+
+      .makeLogo {
+        padding: 10px;
+
+        img {
+          border-right: 1px solid #ccc;
+          padding-right: 10px;
+        }
+      }
+
+      .textBottom {
+        font-size: 0.26rem;
+        color: #ccc;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .virtualCanvasDom {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
 }
 </style>
