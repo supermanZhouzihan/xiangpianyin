@@ -167,17 +167,27 @@ export default {
       canvasImgUrl: "",
       renderOldImgXSize: "",
       renderOldImgYSize: "",
-      batchId: ""
+      batchId: "",
+      openId:""
     };
   },
   // created() {
 
   // },
   mounted() {
-    // this.getOpenId()
+    this.getOpenId()
     // console.log(this,this.$toast)
   },
   methods: {
+    getOpenId(){
+       let openId = this.getHashSearchParam("openId");
+       if(openId){
+        this.openId=openId
+       }
+       else{
+        this.openId="";
+       }
+    },
     //上传前
     beforeRead(file) {
       // alert(file.type);
@@ -278,7 +288,7 @@ export default {
           this.htmlUrl.push(imgUrl);
           if (this.htmlUrl.length == this.currentImgInfo.length) {
             let params = {
-              openId: "test001",
+              openId: this.openId,
               picList: [
                 {
                   type: "png",
@@ -307,7 +317,7 @@ export default {
                   }
                   let reportUrl = this.baseUrl + "/back/reportUpload";
                   let findHaveFail = ossStatus.find((item) => item != 200);//是否有上传失败的
-                  axios.post(reportUrl, { batchId: this.batchId, code: findHaveFail ? -1 : 1,openId:"test001" }).then((res) => {
+                  axios.post(reportUrl, { batchId: this.batchId, code: findHaveFail ? -1 : 1,openId:this.openId }).then((res) => {
                     console.log("全部上传成功wahhh");
                     
                     this.$toast.clear();
@@ -377,19 +387,19 @@ export default {
       return numerator / gcd + "/" + denominator / gcd;
     },
 
-    getOpenId() {
-      let localOpendId = localStorage.getItem("wx_openId");
-      //本地是否有openId
-      if (localOpendId) {
-        this.wx_openId = localOpendId;
-        // this.getRecord();
-      } else {
-        this.login();
-      }
-    },
+    // getOpenId() {
+    //   let localOpendId = localStorage.getItem("wx_openId");
+    //   //本地是否有openId
+    //   if (localOpendId) {
+    //     this.wx_openId = localOpendId;
+    //     // this.getRecord();
+    //   } else {
+    //     this.login();
+    //   }
+    // },
     //wx登录
     login() {
-      let openId = this.getHashSearchParam("openid");
+      let openId = this.getHashSearchParam("openId");
       if (openId == null || openId === "") {
         let url =
           (window.location.host == "https://www.xiangpianyin.com"

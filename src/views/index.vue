@@ -168,17 +168,27 @@ export default {
       renderOldImgYSize: "",
       batchId: "",
       currentImgInfoLength: 0,
+      openId:""
     };
   },
   // created() {
 
   // },
   mounted() {
-    // this.getOpenId()
+    this.getOpenId()
     // console.log(this,this.$toast)
   },
 
   methods: {
+    getOpenId(){
+       let openId = this.getHashSearchParam("openId");
+       if(openId){
+        this.openId=openId
+       }
+       else{
+        this.openId="";
+       }
+    },
 
     //上传前
     beforeRead(file) {
@@ -300,7 +310,7 @@ export default {
           if (this.htmlUrl.length == this.currentImgInfo.length) {
             console.timeEnd("计时器2");
             let params = {
-              openId: "test001",
+              openId: this.openId,
               picList: [
                 {
                   type: "png",
@@ -335,7 +345,7 @@ export default {
                           let findHaveFail = ossStatus.find(item => item != 200);//是否有上传失败的
                           console.log('进这里2findHaveFail', findHaveFail)
                           console.time("计时器4")
-                          axios.post(reportUrl, { batchId: this.batchId, code: findHaveFail ? -1 : 1, openId: "test001" }).then((res) => {
+                          axios.post(reportUrl, { batchId: this.batchId, code: findHaveFail ? -1 : 1, openId:this.openId }).then((res) => {
                             console.timeEnd('计时器4')
                             this.$toast.clear();
                           })
@@ -352,7 +362,7 @@ export default {
                 } else {
                   this.$toast({
                     type:'fail',
-                    message:res.msg
+                    message:res.message
                   });
                 }
               })
@@ -416,33 +426,33 @@ export default {
       return numerator / gcd + "/" + denominator / gcd;
     },
 
-    getOpenId() {
-      let localOpendId = localStorage.getItem("wx_openId");
-      //本地是否有openId
-      if (localOpendId) {
-        this.wx_openId = localOpendId;
-        // this.getRecord();
-      } else {
-        this.login();
-      }
-    },
+    // getOpenId() {
+    //   let localOpendId = localStorage.getItem("wx_openId");
+    //   //本地是否有openId
+    //   if (localOpendId) {
+    //     this.wx_openId = localOpendId;
+    //     // this.getRecord();
+    //   } else {
+    //     this.login();
+    //   }
+    // },
     //wx登录
-    login() {
-      let openId = this.getHashSearchParam("openid");
-      if (openId == null || openId === "") {
-        let url =
-          (window.location.host == "https://www.xiangpianyin.com"
-            ? "https://www.xiangpianyin.com"
-            : "http://47.109.184.216:1234") +
-          "/api/wechat.base/oauth?redirect_url=" +
-          encodeURIComponent(window.location.href);
-        window.location.href = url;
-      } else {
-        this.wx_openId = openId;
-        localStorage.setItem("wx_openId", openId);
-        // this.getRecord();
-      }
-    },
+    // login() {
+    //   let openId = this.getHashSearchParam("openid");
+    //   if (openId == null || openId === "") {
+    //     let url =
+    //       (window.location.host == "https://www.xiangpianyin.com"
+    //         ? "https://www.xiangpianyin.com"
+    //         : "http://47.109.184.216:1234") +
+    //       "/api/wechat.base/oauth?redirect_url=" +
+    //       encodeURIComponent(window.location.href);
+    //     window.location.href = url;
+    //   } else {
+    //     this.wx_openId = openId;
+    //     localStorage.setItem("wx_openId", openId);
+    //     // this.getRecord();
+    //   }
+    // },
     getHashSearchParam(key) {
       // const search = /(?<=#.*\?).*/.exec(location.href)?.[0];
       // const usp = new URLSearchParams(search);
