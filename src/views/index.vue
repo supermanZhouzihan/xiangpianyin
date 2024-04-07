@@ -17,7 +17,7 @@
         margin-bottom: 10px;
       ">
       <van-uploader :after-read="afterRead" :before-read="beforeRead" multiple :max-size="40 * 1024 * 1024"
-        @oversize="onOversize" :max-count="4">
+        @oversize="onOversize" :max-count="8">
         <div style="width: 94%; background-color: rgb(33, 33, 33);margin: 0 auto 0.2rem;
         padding: 0.5rem 0;">
           <van-button round color="rgb(241,241,241)" class="uploadBtn">
@@ -34,7 +34,7 @@
     <div v-if="currentImgInfo && currentImgInfo.length > 0" style="width: 100%" class="virtualCanvasDom">
       <div v-for="item in currentImgInfo" :key="item.index" style="width: 100%">
         <div :ref="'imageTofile' + item.index" class="virtualImgContainer">
-          <img :src="item.imgUrl" alt="" class="cusimg" />
+          <img :src="item.imgUrl" alt="" class="cusimg" @load="imgLoaded" />
           <div class="imginfo" v-if="item">
             <div class="text-left">
               <div>{{ item.Model }}</div>
@@ -168,7 +168,8 @@ export default {
       renderOldImgYSize: "",
       batchId: "",
       currentImgInfoLength: 0,
-      openId:""
+      openId: "",
+      count: 0
     };
   },
   // created() {
@@ -180,19 +181,18 @@ export default {
   },
 
   methods: {
-    getOpenId(){
-       let openId = this.getHashSearchParam("openId");
-       if(openId){
-        this.openId=openId
-       }
-       else{
-        this.openId="";
-       }
+    getOpenId() {
+      let openId = this.getHashSearchParam("openId");
+      if (openId) {
+        this.openId = openId
+      }
+      else {
+        this.openId = "";
+      }
     },
 
     //上传前
     beforeRead(file) {
-      // alert(file.type);
       console.log("beforeRead---------------------file", file);
       console.time("计时器0");
 
@@ -236,6 +236,7 @@ export default {
     afterRead(file) {
       console.log("afterRead---------------file", file);
       this.currentImgInfo = [];
+      this.count=0;
 
       //多个文件
       if (Array.isArray(file)) {
@@ -257,19 +258,26 @@ export default {
         // 这里面可以看到值，想要什么直接获取即可。
         let currentImgInfo = EXIF.getAllTags(this);
         currentImgInfo.imgUrl = file.content;
+        console.log('file', file)
         currentImgInfo.index = index;
         that.currentImgInfo.push(currentImgInfo);
-        if (that.currentImgInfo.length == that.currentImgInfoLength) {
-          // that.$toast.clear();
+        // if (that.currentImgInfo.length == that.currentImgInfoLength) {
+        //   // that.$toast.clear();
 
-          that.$nextTick(() => {
-            console.timeEnd("计时器1");
-            that.batchTofile();
+        //   that.$nextTick(() => {
+        //     console.timeEnd("计时器1");
+        //     that.batchTofile();
 
-          })
-        }
-        // if(that.currentImgInfo)
+        //   })
+        // }
       });
+    },
+
+    imgLoaded() {
+      this.count++;
+        if (this.count == this.currentImgInfoLength) {
+          this.batchTofile();
+        }
     },
     batchTofile() {
       this.htmlUrl = [];
@@ -283,7 +291,7 @@ export default {
       //   overlay:true
       // })
 
-      this.currentImgInfo.forEach((item)=>{
+      this.currentImgInfo.forEach((item) => {
         let ref = "imageTofile" + [item.index];
         this.imgTofile(ref);
       })
@@ -294,10 +302,10 @@ export default {
       let renderDom = this.$refs[ref][0];
       let width = renderDom.offsetWidth;
       let height = renderDom.offsetHeight;
+      console.log(width, height)
 
       let max = Math.max(width, height);
       let scale = parseInt(4000 / max);
-
       html2canvas(this.$refs[ref][0], {
         backgroundColor: "#fff",
         scale: scale,
@@ -328,7 +336,8 @@ export default {
                   let ossStatus = [];
                   // 循环上传oss
                   console.time("计时器3")
-                  console.log("执行了11111111111", list)
+                  console.log("执行了11111111111", list);
+
                   for (let i = 0; i < list.length; i++) {
                     axios
                       .put(list[i], this.base64ToFile(this.htmlUrl[i]), {
@@ -345,29 +354,29 @@ export default {
                           let findHaveFail = ossStatus.find(item => item != 200);//是否有上传失败的
                           console.log('进这里2findHaveFail', findHaveFail)
                           console.time("计时器4")
-                          axios.post(reportUrl, { batchId: this.batchId, code: findHaveFail ? -1 : 1, openId:this.openId }).then((res) => {
+                          axios.post(reportUrl, { batchId: this.batchId, code: findHaveFail ? -1 : 1, openId: this.openId }).then((res) => {
                             console.timeEnd('计时器4')
                             this.$toast.clear();
                           })
                         }
 
-                      }).catch((err)=>{
+                      }).catch((err) => {
                         this.$toast.clear();
                         this.$toast({
-                          type:'fail',
-                          message:'上传失败，请稍后重试',
+                          type: 'fail',
+                          message: '上传失败，请稍后重试1',
                         })
                       });
                   }
                 } else {
                   this.$toast({
-                    type:'fail',
-                    message:res.message
+                    type: 'fail',
+                    message: res.message
                   });
                 }
               })
               .catch((err) => {
-                this.$toast.fail("上传失败，请稍后重试");
+                this.$toast.fail(`上传失败，请稍后重试2${err}`);
               });
           }
           // this.$nextTick(() => {
@@ -378,6 +387,8 @@ export default {
           console.log(err);
           this.$toast.clear();
         });
+
+
     },
     onOversize(file) {
       console.log(file);
@@ -603,6 +614,6 @@ export default {
     position: absolute;
     top: -9999px;
     left: -9999px;
-  }
+  } 
 }
 </style>
