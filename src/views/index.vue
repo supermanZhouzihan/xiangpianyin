@@ -11,27 +11,51 @@
 <template>
   <div class="photoViewContainer">
     <div class="title">你好，摄影师！</div>
-    <div style="
-        width: 100%;
-        box-sizing: border-box;
-        margin-bottom: 10px;
-      ">
-      <van-uploader :after-read="afterRead" :before-read="beforeRead" multiple :max-size="40 * 1024 * 1024"
-        @oversize="onOversize" :max-count="8">
-        <div style="width: 94%; background-color: rgb(33, 33, 33);margin: 0 auto 0.2rem;
-        padding: 0.5rem 0;">
+    <div style="width: 100%; box-sizing: border-box; margin-bottom: 10px">
+      <van-uploader
+        :after-read="afterRead"
+        :before-read="beforeRead"
+        multiple
+        :max-size="40 * 1024 * 1024"
+        @oversize="onOversize"
+        :max-count="8"
+      >
+        <div
+          style="
+            width: 94%;
+            background-color: rgb(33, 33, 33);
+            margin: 0 auto 0.2rem;
+            padding: 0.5rem 0;
+          "
+        >
           <van-button round color="rgb(241,241,241)" class="uploadBtn">
             上传照片
           </van-button>
         </div>
         <div class="exampleList">
-          <img src="../assets/example.jpg" style="width: 100%; margin-bottom: 10px" alt="" />
-          <img src="../assets/example.jpg" style="width: 100%; margin-bottom: 10px" alt="" />
-          <img src="../assets/example.jpg" style="width: 100%; margin-bottom: 10px" alt="" />
+          <img
+            src="../assets/example.jpg"
+            style="width: 100%; margin-bottom: 10px"
+            alt=""
+          />
+          <img
+            src="../assets/example.jpg"
+            style="width: 100%; margin-bottom: 10px"
+            alt=""
+          />
+          <img
+            src="../assets/example.jpg"
+            style="width: 100%; margin-bottom: 10px"
+            alt=""
+          />
         </div>
       </van-uploader>
     </div>
-    <div v-if="currentImgInfo && currentImgInfo.length > 0" style="width: 100%" class="virtualCanvasDom">
+    <div
+      v-if="currentImgInfo && currentImgInfo.length > 0"
+      style="width: 100%"
+      class="virtualCanvasDom"
+    >
       <div v-for="item in currentImgInfo" :key="item.index" style="width: 100%">
         <div :ref="'imageTofile' + item.index" class="virtualImgContainer">
           <img :src="item.imgUrl" alt="" class="cusimg" @load="imgLoaded" />
@@ -47,31 +71,33 @@
               </div>
               <div>
                 <div>
-                  <span v-if="item.ExposureTime">{{ item.FocalLength }}mm f/{{ item.FNumber }}
+                  <span v-if="item.ExposureTime"
+                    >{{ item.FocalLength }}mm f/{{ item.FNumber }}
                     {{
-        reduceFraction(
-          item.ExposureTime.numerator,
-          item.ExposureTime.denominator
-        )
-      }}
-                    ISO{{ item.ISOSpeedRatings }}</span>
+                      reduceFraction(
+                        item.ExposureTime.numerator,
+                        item.ExposureTime.denominator
+                      )
+                    }}
+                    ISO{{ item.ISOSpeedRatings }}</span
+                  >
                 </div>
                 <div v-if="item.GPSLongitude" class="textBottom">
                   {{
-        item.GPSLatitude[0] +
-        "°" +
-        item.GPSLatitude[1] +
-        "′" +
-        item.GPSLatitude[2] +
-        "″N"
-      }}
+                    item.GPSLatitude[0] +
+                    "°" +
+                    item.GPSLatitude[1] +
+                    "′" +
+                    item.GPSLatitude[2] +
+                    "″N"
+                  }}
                   {{
-          item.GPSLongitude[0] +
-          "°" +
-          item.GPSLongitude[1] +
-          "′" +
-          item.GPSLongitude[2] +
-                  "″E"
+                    item.GPSLongitude[0] +
+                    "°" +
+                    item.GPSLongitude[1] +
+                    "′" +
+                    item.GPSLongitude[2] +
+                    "″E"
                   }}
                 </div>
               </div>
@@ -80,7 +106,6 @@
         </div>
       </div>
     </div>
-
 
     <!-- <div class="imgContainer">
       <img :src="currentImgUrl" alt="" class="cusimg" />
@@ -132,7 +157,14 @@
       </div>
     </div> -->
 
-    <img v-for="item in htmlUrl" v-show="isShow" :src="item" :key="item.index" v-lazy="item" alt="" />
+    <img
+      v-for="item in htmlUrl"
+      v-show="isShow"
+      :src="item"
+      :key="item.index"
+      v-lazy="item"
+      alt=""
+    />
 
     <!-- <van-uploader
       :after-read="afterRead"
@@ -169,14 +201,14 @@ export default {
       batchId: "",
       currentImgInfoLength: 0,
       openId: "",
-      count: 0
+      count: 0,
     };
   },
   // created() {
 
   // },
   mounted() {
-    this.getOpenId()
+    this.getOpenId();
     // console.log(this,this.$toast)
   },
 
@@ -184,9 +216,8 @@ export default {
     getOpenId() {
       let openId = this.getHashSearchParam("openId");
       if (openId) {
-        this.openId = openId
-      }
-      else {
+        this.openId = openId;
+      } else {
         this.openId = "";
       }
     },
@@ -198,19 +229,19 @@ export default {
 
       // Toast.loading({
       //   message: '加载中...',
-      //   duration: 0, 
+      //   duration: 0,
       //   forbidClick: true
       // });
 
       // console.log(this.this.$toast)
 
       this.$toast({
-        type: 'loading',
-        message: '加载中...',
+        type: "loading",
+        message: "加载中...",
         duration: 0,
         forbidClick: true,
-        overlay: true
-      })
+        overlay: true,
+      });
 
       if (Array.isArray(file)) {
         let fileList = file;
@@ -219,13 +250,13 @@ export default {
         );
         if (findNoJpgPng) {
           alert("请上传 jpg / png格式图片");
-          this.$toast.clear()
+          this.$toast.clear();
           return false;
         }
       } else {
         if (file.type !== "image/jpeg" && file.type !== "image/png") {
           alert("请上传 jpg / png格式图片");
-          this.$toast.clear()
+          this.$toast.clear();
           return false;
         }
       }
@@ -236,7 +267,7 @@ export default {
     afterRead(file) {
       console.log("afterRead---------------file", file);
       this.currentImgInfo = [];
-      this.count=0;
+      this.count = 0;
 
       //多个文件
       if (Array.isArray(file)) {
@@ -246,10 +277,10 @@ export default {
         });
       } else {
         this.getExifData(file, 0);
-        this.currentImgInfoLength = 1
+        this.currentImgInfoLength = 1;
       }
       console.timeEnd("计时器0");
-      console.time("计时器1")
+      console.time("计时器1");
     },
     getExifData(file, index) {
       //单个文件
@@ -258,7 +289,7 @@ export default {
         // 这里面可以看到值，想要什么直接获取即可。
         let currentImgInfo = EXIF.getAllTags(this);
         currentImgInfo.imgUrl = file.content;
-        console.log('file', file)
+        console.log("file", file);
         currentImgInfo.index = index;
         that.currentImgInfo.push(currentImgInfo);
         // if (that.currentImgInfo.length == that.currentImgInfoLength) {
@@ -275,13 +306,13 @@ export default {
 
     imgLoaded() {
       this.count++;
-        if (this.count == this.currentImgInfoLength) {
-          this.batchTofile();
-        }
+      if (this.count == this.currentImgInfoLength) {
+        this.batchTofile();
+      }
     },
     batchTofile() {
       this.htmlUrl = [];
-      console.log('执行了')
+      console.log("执行了");
       console.time("计时器2");
       // this.$toast({
       //   type:'loading',
@@ -294,15 +325,14 @@ export default {
       this.currentImgInfo.forEach((item) => {
         let ref = "imageTofile" + [item.index];
         this.imgTofile(ref);
-      })
-
+      });
     },
     imgTofile(ref) {
-      console.log(ref)
+      console.log(ref);
       let renderDom = this.$refs[ref][0];
       let width = renderDom.offsetWidth;
       let height = renderDom.offsetHeight;
-      console.log(width, height)
+      console.log(width, height);
 
       let max = Math.max(width, height);
       let scale = parseInt(4000 / max);
@@ -335,7 +365,7 @@ export default {
                   this.batchId = res.data.data.batchId;
                   let ossStatus = [];
                   // 循环上传oss
-                  console.time("计时器3")
+                  console.time("计时器3");
                   console.log("执行了11111111111", list);
 
                   for (let i = 0; i < list.length; i++) {
@@ -346,32 +376,44 @@ export default {
                         },
                       })
                       .then((res) => {
-                        ossStatus.push(res.status)
+                        ossStatus.push(res.status);
                         if (ossStatus.length == list.length) {
-                          console.timeEnd("计时器3")
-                          console.log('ossStatus', ossStatus)
+                          console.timeEnd("计时器3");
+                          console.log("ossStatus", ossStatus);
                           let reportUrl = this.baseUrl + "/back/reportUpload";
-                          let findHaveFail = ossStatus.find(item => item != 200);//是否有上传失败的
-                          console.log('进这里2findHaveFail', findHaveFail)
-                          console.time("计时器4")
-                          axios.post(reportUrl, { batchId: this.batchId, code: findHaveFail ? -1 : 1, openId: this.openId }).then((res) => {
-                            console.timeEnd('计时器4')
-                            this.$toast.clear();
-                          })
+                          let findHaveFail = ossStatus.find(
+                            (item) => item != 200
+                          ); //是否有上传失败的
+                          console.log("进这里2findHaveFail", findHaveFail);
+                          console.time("计时器4");
+                          axios
+                            .post(reportUrl, {
+                              batchId: this.batchId,
+                              code: findHaveFail ? -1 : 1,
+                              openId: this.openId,
+                            })
+                            .then((res) => {
+                              console.timeEnd("计时器4");
+                              this.$dialog.alert({
+                                title:"温馨提示",
+                                message: "水印照片已合成完毕，请返回公众号进行查看"
+                              });
+                              this.$toast.clear();
+                            });
                         }
-
-                      }).catch((err) => {
+                      })
+                      .catch((err) => {
                         this.$toast.clear();
                         this.$toast({
-                          type: 'fail',
-                          message: '上传失败，请稍后重试1',
-                        })
+                          type: "fail",
+                          message: "上传失败，请稍后重试1",
+                        });
                       });
                   }
                 } else {
                   this.$toast({
-                    type: 'fail',
-                    message: res.message
+                    type: "fail",
+                    message: res.message,
                   });
                 }
               })
@@ -387,8 +429,6 @@ export default {
           console.log(err);
           this.$toast.clear();
         });
-
-
     },
     onOversize(file) {
       console.log(file);
@@ -575,7 +615,7 @@ export default {
     }
   }
 
-  >div.imgContainer {
+  > div.imgContainer {
     width: 80%;
     margin: 0 auto;
 
@@ -614,6 +654,6 @@ export default {
     position: absolute;
     top: -9999px;
     left: -9999px;
-  } 
+  }
 }
 </style>
