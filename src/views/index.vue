@@ -15,7 +15,7 @@
       <van-uploader
         :after-read="afterRead"
         :before-read="beforeRead"
-        multiple
+        :multiple="multiple"
         :max-size="40 * 1024 * 1024"
         @oversize="onOversize"
         :max-count="8"
@@ -67,7 +67,7 @@
 
             <div class="text-left flexBetween" style="align-items: center">
               <div class="makeLogo">
-                <img src="../assets/logo.png" alt="" style="width: 0.5rem" />
+                <img :src="`../assets/logo/${item.Make?item.Make:'default'}.png`" alt="" style="width: 0.5rem" />
               </div>
               <div>
                 <div>
@@ -202,6 +202,7 @@ export default {
       currentImgInfoLength: 0,
       openId: "",
       count: 0,
+      multiple:false //是否可以多选
     };
   },
   // created() {
@@ -292,6 +293,7 @@ export default {
         console.log("file", file);
         currentImgInfo.index = index;
         that.currentImgInfo.push(currentImgInfo);
+        console.log('读出来的数据',currentImgInfo)
         // if (that.currentImgInfo.length == that.currentImgInfoLength) {
         //   // that.$toast.clear();
 
