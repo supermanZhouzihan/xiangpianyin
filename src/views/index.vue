@@ -34,17 +34,17 @@
         </div>
         <div class="exampleList">
           <img
-            src="../assets/example.jpg"
+            src="https://shejiayu.oss-cn-chengdu.aliyuncs.com/app/1783128721898229761.png?x-oss-process=image/resize,m_lfit,w_800"
             style="width: 100%; margin-bottom: 10px"
             alt=""
           />
           <img
-            src="../assets/example.jpg"
+            src="https://shejiayu.oss-cn-chengdu.aliyuncs.com/app/1783128489013694465.png?x-oss-process=image/resize,m_lfit,w_800"
             style="width: 100%; margin-bottom: 10px"
             alt=""
           />
           <img
-            src="../assets/example.jpg"
+            src="https://shejiayu.oss-cn-chengdu.aliyuncs.com/app/1783127305578237953.png?x-oss-process=image/resize,m_lfit,w_800"
             style="width: 100%; margin-bottom: 10px"
             alt=""
           />
@@ -67,7 +67,8 @@
 
             <div class="text-left flexBetween" style="align-items: center">
               <div class="makeLogo">
-                <img :src="`../assets/logo/${item.Make?item.Make:'default'}.png`" alt="" style="width: 0.5rem" />
+                <!-- <img :src="`../assets/logo/${item.Make?item.Make:'default'}.png`" alt="" style="width: 0.5rem" /> -->
+                <img src="../assets/logo/default.png" alt="" style="width: 1.5rem" />
               </div>
               <div>
                 <div>
@@ -601,7 +602,7 @@ export default {
       font-weight: 700;
 
       .makeLogo {
-        padding: 10px;
+        padding:4px 10px;
 
         img {
           border-right: 1px solid #ccc;
